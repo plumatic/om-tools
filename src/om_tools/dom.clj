@@ -27,7 +27,8 @@
       keyword))
 
 (defn literal? [form]
-  (some #(% form) [map? vector? number? keyword? string?]))
+  (not (or (symbol? form)
+           (list? form))))
 
 (def form-tags
   '[input textarea option])
@@ -37,13 +38,17 @@
     (symbol "om.dom" (name tag))
     (symbol "js" (str "React.DOM." (name tag)))))
 
+(defn valid-opts? [opts]
+  (or (nil? opts) (map? opts)))
+
 (defn ^:private gen-om-dom-inline-fn [tag]
   `(defmacro ~tag [opts# & children#]
      (let [ctor# '~(el-ctor tag)]
        (if (literal? opts#)
-         (let [children# (if (map? opts#) children# (cons opts# children#))
-               opts# (when (map? opts#) (JSValue. (map-keys format-opt opts#)))]
-           `(~ctor# ~opts# ~@(flatten children#)))
+         (let [[opts# children#] (if (valid-opts? opts#)
+                                   [(when opts# (JSValue. (map-keys format-opt opts#))) children#]
+                                   [nil (cons opts# children#)])]
+           `(apply ~ctor# ~opts# (flatten '~children#)))
          `(om-tools.dom/el ~ctor# ~opts# '~children#)))))
 
 (defmacro ^:private gen-om-dom-inline-fns []
