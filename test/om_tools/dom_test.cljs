@@ -6,16 +6,16 @@
    [om.dom :as om-dom :include-macros true]
    [om-tools.dom :as dom :include-macros true]))
 
+(def +react-dom-prototype+ (.-prototype (js/React.DOM.span nil)))
+
+(defn react-dom? [x]
+  (and x (= (.-prototype x) +react-dom-prototype+)))
+
 (defn props [el]
   (js->clj (.-props el) :keywordize-keys true))
 
 (defn children [el]
   (:children (props el)))
-
-(def +react-dom-prototype+ (.-prototype (js/React.DOM.span nil)))
-
-(defn react-dom? [x]
-  (and x (= (.-prototype x) +react-dom-prototype+)))
 
 (defn is=el [el1 el2]
   (is (= (.-tagName el1) (.-tagName el2)))
