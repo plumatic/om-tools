@@ -30,6 +30,11 @@
   (not (or (symbol? form)
            (list? form))))
 
+(defn possible-coll? [form]
+  (or (coll? form)
+      (symbol? form)
+      (list? form)))
+
 (def form-tags
   '[input textarea option])
 
@@ -48,7 +53,15 @@
          (let [[opts# children#] (if (valid-opts? opts#)
                                    [(when opts# (JSValue. (map-keys format-opt opts#))) children#]
                                    [nil (cons opts# children#)])]
-           `(apply ~ctor# ~opts# (flatten '~children#)))
+           (cond
+            (every? (complement possible-coll?) children#)
+            `(~ctor# ~opts# ~@children#)
+
+            (and (= (count children#) 1) (vector? (first children#)))
+            `(~ctor# ~opts# ~@(-> children# first flatten))
+
+            :else
+            `(apply ~ctor# ~opts# (flatten (vector ~@children#)))))
          `(om-tools.dom/el ~ctor# ~opts# '~children#)))))
 
 (defmacro ^:private gen-om-dom-inline-fns []
