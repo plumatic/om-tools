@@ -48,6 +48,10 @@
     (is=el (children (dom/div (dom/span "test")))
            (children (om-dom/div nil (om-dom/span nil "test")))))
 
+  (testing "nesting with opts"
+    (is=el (children (dom/div {:id "test"} (dom/span "test")))
+           (children (om-dom/div #js {:id "test"} (om-dom/span nil "test")))))
+
   (testing "seq children"
     (let [xs (range 10)
           el (dom/ul (for [x xs] (dom/li x)))
