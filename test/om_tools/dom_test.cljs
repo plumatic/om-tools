@@ -15,8 +15,7 @@
 (def +react-dom-prototype+ (.-prototype (js/React.DOM.span nil)))
 
 (defn react-dom? [x]
-  (and (not (nil? x))
-       (= (.-prototype x) +react-dom-prototype+)))
+  (and x (= (.-prototype x) +react-dom-prototype+)))
 
 (defn is=el [el1 el2]
   (is (= (.-tagName el1) (.-tagName el2)))
