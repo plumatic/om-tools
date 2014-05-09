@@ -37,6 +37,9 @@
 
      :else (is (= el1-children el2-children)))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Tests
+
 (deftest el
   (is=el (dom/el js/React.DOM.a {:href "/"} ["foo" "bar"])
          (om-dom/a #js {:href "/"} "foo" "bar")))
