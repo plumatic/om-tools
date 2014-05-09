@@ -62,7 +62,7 @@
 
             :else
             `(apply ~ctor# ~opts# (flatten (vector ~@children#)))))
-         `(om-tools.dom/el ~ctor# ~opts# '~children#)))))
+         `(om-tools.dom/el ~ctor# ~opts# (vector ~@children#))))))
 
 (defmacro ^:private gen-om-dom-inline-fns []
   `(do

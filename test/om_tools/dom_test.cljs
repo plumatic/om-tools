@@ -6,6 +6,11 @@
    [om.dom :as om-dom :include-macros true]
    [om-tools.dom :as dom :include-macros true]))
 
+(def +react-dom-prototype+ (.-prototype (js/React.DOM.span nil)))
+
+(defn react-dom? [x]
+  (and x (= (.-prototype x) +react-dom-prototype+)))
+
 (defn props [el]
   (js->clj (.-props el) :keywordize-keys true))
 
@@ -14,7 +19,26 @@
 
 (defn is=el [el1 el2]
   (is (= (.-tagName el1) (.-tagName el2)))
-  (is (= (props el1) (props el2))))
+  (let [el1-props (props el1)
+        el2-props (props el2)
+        el1-children (:children el1-props)
+        el2-children (:children el2-props)]
+
+    (is (= (dissoc el1-props :children)
+           (dissoc el1-props :children)))
+
+    (cond
+     (every? coll? [el1-children el2-children])
+     (doseq [[c1 c2] (map vector (:children el1-props) (:children el2-props))]
+       (is=el c1 c2))
+
+     (every? react-dom? [el1-children el2-children])
+     (is=el el1-children el2-children)
+
+     :else (is (= el1-children el2-children)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Tests
 
 (deftest el
   (is=el (dom/el js/React.DOM.a {:href "/"} ["foo" "bar"])
@@ -45,12 +69,20 @@
            (om-dom/input #js {:value "test"})))
 
   (testing "simple nesting"
-    (is=el (children (dom/div (dom/span "test")))
-           (children (om-dom/div nil (om-dom/span nil "test")))))
+    (is=el (dom/div (dom/span "test"))
+           (om-dom/div nil (om-dom/span nil "test"))))
 
   (testing "nesting with opts"
-    (is=el (children (dom/div {:id "test"} (dom/span "test")))
-           (children (om-dom/div #js {:id "test"} (om-dom/span nil "test")))))
+    (is=el (dom/div {:id "test"} (dom/span "test"))
+           (om-dom/div #js {:id "test"} (om-dom/span nil "test"))))
+
+  (testing "nesting without opts"
+    (is=el (dom/div (dom/span "test")
+                    (for [x ["foo" "bar"]] (dom/em x)))
+           (apply om-dom/div nil
+                  (om-dom/span nil "test")
+                  (for [x ["foo" "bar"]]
+                    (om-dom/em nil x)))))
 
   (testing "seq children"
     (let [xs (range 10)
