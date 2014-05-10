@@ -1,12 +1,16 @@
 (ns om-tools.dom
   (:refer-clojure :exclude [map meta time])
-  (:use plumbing.core)
   (:require
    [clojure.string :as str]
-   [cljs.core :as cljs]
-   om.dom)
+   om.dom
+   #+clj cljs.core)
+  #+clj
   (:import
    [cljs.tagged_literals JSValue]))
+
+(defn map-keys [f m]
+  (into {} (for [[k v] m]
+             [(f k) v])))
 
 (defn camel-case [s]
   (str/replace
@@ -46,6 +50,14 @@
 (defn valid-opts? [opts]
   (or (nil? opts) (map? opts)))
 
+#+cljs
+(defn element [ctor opts children]
+  (let [[opts children] (if (valid-opts? opts)
+                          [(->> opts (map-keys format-opt) clj->js) children]
+                          [nil (cons opts children)])]
+    (apply ctor (flatten (cons opts children)))))
+
+#+clj
 (defn ^:private gen-om-dom-inline-fn [tag]
   `(defmacro ~tag [opts# & children#]
      (let [ctor# '~(el-ctor tag)]
@@ -62,10 +74,11 @@
 
             :else
             `(apply ~ctor# ~opts# (flatten (vector ~@children#)))))
-         `(om-tools.dom/el ~ctor# ~opts# (vector ~@children#))))))
+         `(om-tools.dom/element ~ctor# ~opts# (vector ~@children#))))))
 
 (defmacro ^:private gen-om-dom-inline-fns []
   `(do
      ~@(clojure.core/map gen-om-dom-inline-fn (concat om.dom/tags form-tags))))
 
+#+clj
 (gen-om-dom-inline-fns)
