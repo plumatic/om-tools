@@ -40,8 +40,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Tests
 
-(deftest el
-  (is=el (dom/el js/React.DOM.a {:href "/"} ["foo" "bar"])
+(deftest element
+  (is=el (dom/element js/React.DOM.a {:href "/"} ["foo" "bar"])
          (om-dom/a #js {:href "/"} "foo" "bar")))
 
 (deftest om-equiv
@@ -83,6 +83,10 @@
                   (om-dom/span nil "test")
                   (for [x ["foo" "bar"]]
                     (om-dom/em nil x)))))
+
+  (testing "nesting with opts"
+    (is=el (children (dom/div {:id "test"} (dom/span "test")))
+           (children (om-dom/div #js {:id "test"} (om-dom/span nil "test")))))
 
   (testing "seq children"
     (let [xs (range 10)

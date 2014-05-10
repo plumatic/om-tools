@@ -4,13 +4,24 @@
 
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/clojurescript "0.0-2202"]
-                 [prismatic/plumbing "0.2.2"]
+                 [com.keminglabs/cljx "0.3.1"]
                  [om "0.6.2"]]
 
-  :plugins [[lein-cljsbuild "1.0.3"]
+  :plugins [[com.keminglabs/cljx "0.3.1"]
+            [lein-cljsbuild "1.0.3"]
             [com.cemerick/clojurescript.test "0.2.2"]]
 
-  :source-paths ["src"]
+  :cljx
+  {:builds [{:source-paths ["src"]
+             :output-path "target/generated/src"
+             :rules :clj}
+            {:source-paths ["src"]
+             :output-path "target/generated/src"
+             :rules :cljs}]}
+
+  :source-paths ["src" "target/generated/src"]
+
+  :hooks [leiningen.cljsbuild]
 
   :cljsbuild
   {:test-commands {"unit" ["phantomjs" :runner
@@ -18,7 +29,7 @@
                            "this.literal_js_was_evaluated=true"
                            "target/om_tools.js"]}
    :builds [{:id "om-tools"
-             :source-paths ["src" "test"]
+             :source-paths ["src" "test" "target/generated/src"]
              :compiler {:output-to "target/om_tools.js"
                         :optimizations :whitespace
                         :preamble ["react/react.min.js"]
