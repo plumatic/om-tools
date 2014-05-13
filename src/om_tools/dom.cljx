@@ -15,7 +15,7 @@
 (defn camel-case [s]
   (str/replace
    s #"-(\w)"
-   #(str/upper-case (second %1))))
+   #(str/upper-case (second %))))
 
 (defn opt-alias [opt]
   (case opt
