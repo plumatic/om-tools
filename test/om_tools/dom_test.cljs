@@ -41,8 +41,17 @@
 ;;; Tests
 
 (deftest element
-  (is=el (dom/element js/React.DOM.a {:href "/"} ["foo" "bar"])
-         (om-dom/a #js {:href "/"} "foo" "bar")))
+  (testing "simple element"
+    (is=el (dom/element js/React.DOM.a {:href "/"} ["foo" "bar"])
+           (om-dom/a #js {:href "/"} "foo" "bar")))
+  (testing "opt formatting"
+    (is=el (dom/element js/React.DOM.a {:on-click println} "foo")
+           (om-dom/a #js {:onClick println} "foo")))
+  (testing "opt alias"
+    (is=el (dom/element js/React.DOM.a {:class "bar"} "foo")
+           (om-dom/a #js {:className "bar"} "foo"))
+    (is=el (dom/element js/React.DOM.label {:for "bar"} "foo")
+           (om-dom/label #js {:htmlFor "bar"} "foo"))))
 
 (deftest om-equiv
   (testing "simple tag"
