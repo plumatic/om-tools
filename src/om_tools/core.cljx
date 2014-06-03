@@ -81,7 +81,24 @@
   `(reify ~@(add-component-protocols forms)))
 
 (defmacro defcomponent
-  "Defines a component using a fnk." ;; TODO
+  "Defines a component using a fnk to destructure and schematize
+  component data and configuration. See plumbing.core/defnk for
+  destructuring semantics.
+
+  The arguments receive the following default keys:
+    :data  The data (cursor) passed to component when built
+    :owner The backing React component
+    :opts  The optional map of options passed when built
+    :state An atom-like object for convenience to om.core/get-state and om.core/set-state!
+
+  The contents will be processed with om-tools.core/component macro.
+
+  Example:
+
+  (defcomponent list-of-gadgets [[:data gadgets] state]
+    (did-mount [_]
+      (swap! state :mounted? true))
+    (render [_] ...))"
   [name & args]
   (let [[doc-string? args] (maybe-split-first string? args)
         [attr-map? more-args] (maybe-split-first map? args)
@@ -90,7 +107,10 @@
        (defn ~name
          ~@(when doc-string? [doc-string?])
          ~@(when attr-map? [attr-map?])
-         [data# owner#]
+         [data# owner# & [opts#]]
          ((p/fnk ~arglist (component ~@forms))
-          {:data data# :owner owner# :state (state-proxy owner#)}))
+          {:data data#
+           :owner owner#
+           :opts opts#
+           :state (state-proxy owner#)}))
        ~(convenience-constructor name))))
