@@ -3,7 +3,7 @@
    [cemerick.cljs.test :refer [is deftest testing use-fixtures done]])
   (:require
    cemerick.cljs.test
-   [om-tools.core :as om-tools :include-macros true]
+   [om-tools.core :as om-tools :include-macros true :refer [defcomponent]]
    [om-tools.dom :as dom :include-macros true]
    [om.core :as om]
    [schema.core :as s]
@@ -17,7 +17,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(om-tools/defcomponent core-test-component
+(defcomponent core-test-component
   [[:data foo bar] :- {:foo s/Str :bar s/Str} owner]
   (display-name [_] (str foo bar "!"))
   (init-state [_] :init-state)
@@ -52,12 +52,13 @@
   (testing "build constructor"
     (is (composite-component? (->core-test-component {:foo "foo" :bar "bar"})))))
 
-(om-tools/defcomponent stateful-component
-  [data state]
-  (did-mount [_] (js/setTimeout #(swap! state assoc :y 2) 20))
-  (render [_] (dom/div nil
-                       (let [{:keys [x y]} @state]
-                         (str "x=" x ",y=" (or y "nil"))))))
+(defcomponent stateful-component [data state]
+  (did-mount [_]
+    (js/setTimeout #(swap! state assoc :y 2) 20))
+  (render [_]
+    (dom/div
+     (let [{:keys [x y]} @state]
+       (str "x=" x ",y=" (or y "nil"))))))
 
 (deftest ^:async state-proxy-test
   (let [e (.createElement js/document "div")]

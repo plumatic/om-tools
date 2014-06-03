@@ -33,6 +33,17 @@
                 [form]))
             forms)))
 
+#+clj
+(defn convenience-constructor [f]
+  `(defn ~(symbol (str "->" (name f)))
+     ([cursor#]
+        (om.core/build ~f cursor#))
+     ([cursor# m#]
+        (om.core/build ~f cursor# m#))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Public
+
 (defn state-proxy
   "Returns an atom-like object for reading and writing Om component state"
   [owner]
@@ -54,17 +65,6 @@
         (-reset! s (f (get-state) x y)))
       (-swap! [s f x y more]
         (-reset! s (apply f (get-state) x y more))))))
-
-#+clj
-(defn convenience-constructor [f]
-  `(defn ~(symbol (str "->" (name f)))
-     ([cursor#]
-        (om.core/build ~f cursor#))
-     ([cursor# m#]
-        (om.core/build ~f cursor# m#))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Public
 
 (defmacro component
   "Simple sugar for defining Om component by removing need to reify
