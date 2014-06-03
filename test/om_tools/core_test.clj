@@ -38,7 +38,7 @@
             (will-receive-props [this next-props] ...)
             (render [this] ...)
             (render-state [this state] ...))))))
-
+#_
 (deftest test-def-component
   (is (= (macroexpand
           '(clojure.core/defn widget
