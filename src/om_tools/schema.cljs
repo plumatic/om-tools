@@ -10,4 +10,4 @@
 (defn cursor
   "Returns a schema to validate an Om cursor"
   [schema]
-  (s/both (s/pred om/cursor?) schema))
+  (s/both Cursor schema))
