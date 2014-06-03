@@ -33,6 +33,28 @@
                 [form]))
             forms)))
 
+(defn state-proxy
+  "Returns an atom-like object for reading and writing Om component state"
+  [owner]
+  #+cljs
+  (let [get-state #(om.core/get-state owner)]
+    (reify
+      IDeref
+      (-deref [_]
+        (get-state))
+      IReset
+      (-reset! [_ v]
+        (om.core/set-state! owner v))
+      ISwap
+      (-swap! [s f]
+        (-reset! s (f (get-state))))
+      (-swap! [s f x]
+        (-reset! s (f (get-state) x)))
+      (-swap! [s f x y]
+        (-reset! s (f (get-state) x y)))
+      (-swap! [s f x y more]
+        (-reset! s (apply f (get-state) x y more))))))
+
 #+clj
 (defn convenience-constructor [f]
   `(defn ~(symbol (str "->" (name f)))
@@ -59,7 +81,7 @@
   `(reify ~@(add-component-protocols forms)))
 
 (defmacro defcomponent
-  ""
+  "Defines a component using a fnk." ;; TODO
   [name & args]
   (let [[doc-string? args] (maybe-split-first string? args)
         [attr-map? more-args] (maybe-split-first map? args)
@@ -70,5 +92,5 @@
          ~@(when attr-map? [attr-map?])
          [data# owner#]
          ((p/fnk ~arglist (component ~@forms))
-          {:data data# :owner owner#}))
+          {:data data# :owner owner# :state (state-proxy owner#)}))
        ~(convenience-constructor name))))

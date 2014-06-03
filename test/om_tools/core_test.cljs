@@ -1,9 +1,10 @@
 (ns om-tools.core-test
   (:require-macros
-   [cemerick.cljs.test :refer [is deftest testing use-fixtures]])
+   [cemerick.cljs.test :refer [is deftest testing use-fixtures done]])
   (:require
    cemerick.cljs.test
    [om-tools.core :as om-tools :include-macros true]
+   [om-tools.dom :as dom :include-macros true]
    [om.core :as om]
    [schema.core :as s]
    [schema.test :as schema-test]))
@@ -50,5 +51,26 @@
     (is (thrown? js/Error (core-test-component {:foo {} :bar "bar"} :owner))))
   (testing "build constructor"
     (is (composite-component? (->core-test-component {:foo "foo" :bar "bar"})))))
+
+(om-tools/defcomponent stateful-component
+  [data state]
+  (did-mount [_] (js/setTimeout #(swap! state assoc :y 2) 20))
+  (render [_] (dom/div nil
+                       (let [{:keys [x y]} @state]
+                         (str "x=" x ",y=" (or y "nil"))))))
+
+(deftest ^:async state-proxy-test
+  (let [e (.createElement js/document "div")]
+    (.. js/document -body (appendChild e))
+    (om/root stateful-component {} {:target e :init-state {:x 5}})
+    (is (= "x=5,y=nil" (.-innerText e)))
+    (om/root stateful-component {} {:target e :state {:x 6}})
+    (is (= "x=6,y=nil" (.-innerText e)))
+    (js/setTimeout
+     (fn []
+       (testing "swapped on state"
+         (is (= "x=6,y=2" (.-innerText e))))
+       (done))
+     60)))
 
 (use-fixtures :once schema-test/validate-schemas)
