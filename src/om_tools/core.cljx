@@ -75,6 +75,15 @@
    will-unmount, did-update, will-receive-props, render, and
    render-state
 
+   Method definitions take the form:
+   (methodname [args*] body)
+
+   Example:
+
+   (component
+     (did-mount [this] ...)
+     (render [this] ...)
+
    Everything inside body is within an implicit reify; any other non-Om protocols
    can be specified if needed."
   [& forms]
@@ -92,6 +101,9 @@
     :state An atom-like object for convenience to om.core/get-state and om.core/set-state!
 
   The contents will be processed with om-tools.core/component macro.
+
+  In addition, a factory function will be defined: ->component-name,
+  to wrap a call to om.core/build, providing any defaults.
 
   Example:
 
