@@ -33,6 +33,14 @@
                 [form]))
             forms)))
 
+#+clj
+(defn convenience-constructor [f]
+  `(defn ~(symbol (str "->" (name f)))
+     ([cursor#]
+        (om.core/build ~f cursor#))
+     ([cursor# m#]
+        (om.core/build ~f cursor# m#))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public
 
@@ -56,10 +64,11 @@
   (let [[doc-string? args] (maybe-split-first string? args)
         [attr-map? more-args] (maybe-split-first map? args)
         [arglist & forms] args]
-    `(defn ~name
-       ~@(when doc-string? [doc-string?])
-       ~@(when attr-map? [attr-map?])
-       [data# owner#]
-       ((p/fnk ~arglist
-          (component ~@forms))
-        {:data data# :owner owner#}))))
+    `(do
+       (defn ~name
+         ~@(when doc-string? [doc-string?])
+         ~@(when attr-map? [attr-map?])
+         [data# owner#]
+         ((p/fnk ~arglist (component ~@forms))
+          {:data data# :owner owner#}))
+       ~(convenience-constructor name))))

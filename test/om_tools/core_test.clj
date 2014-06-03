@@ -38,35 +38,6 @@
             (will-receive-props [this next-props] ...)
             (render [this] ...)
             (render-state [this state] ...))))))
-#_
-(deftest test-def-component
-  (is (= (macroexpand
-          '(clojure.core/defn widget
-             [data owner]
-             (clojure.core/reify
-               om.core/IInitState
-               (init-state [this] {:count 0})
-               om.core/IRender
-               (render [this] (om.dom/h1 nil (:text data))))))
-         (macroexpand
-          '(om-tools.core/defcomponent widget
-             [data owner]
-             (init-state [this] {:count 0})
-             (render [this] (om.dom/h1 nil (:text data)))))))
-
-  (testing "docstring"
-    (is (= (macroexpand
-            '(clojure.core/defn widget
-               "docstring"
-               [data owner]
-               (clojure.core/reify
-                 om.core/IRender
-                 (render [this] (om.dom/h1 nil (:text data))))))
-           (macroexpand
-            '(om-tools.core/defcomponent widget
-               "docstring"
-               [data owner]
-               (render [this] (om.dom/h1 nil (:text data)))))))))
 
 (deftest test-component
   (is (= (macroexpand
