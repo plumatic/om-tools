@@ -13,25 +13,32 @@
 (sm/defschema Item
   {:id s/Int :name s/Str})
 
+(sm/defschema ItemScores
+  {s/Int s/Num})
+
 (sm/defschema App
-  {:items [Item]})
+  {:items [Item]
+   :item-scores ItemScores})
 
 (sm/defschema ItemList
-  {:items (schema/cursor [Item])
+  {:items (schema/cursor [Item])      ;; om.core/IndexedCursor
+   :scores (schema/cursor ItemScores) ;; om.core/MapCursor
    :order s/Keyword})
 
-(defcomponent item-list [[:data items order] :- ItemList]
+(defcomponent item-list [[:data items scores order] :- ItemList]
   (render [_]
     (let [comp-fn (if (= order :asc) compare (comp - compare))]
       (dom/ul
-       (for [u (sort-by :name comp-fn items)]
-         (dom/li (:name u)))))))
+       (for [item (sort-by :name comp-fn items)]
+         (dom/li
+          (str (:name item) "-" (get scores (:id item)))))))))
 
-(defcomponent app [[:data items] :- App]
+(defcomponent app [[:data items item-scores] :- (schema/cursor App)]
   (render [_]
     (dom/div
      (om/build item-list
                {:items items
+                :scores item-scores
                 :order :asc}))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -55,7 +62,8 @@
    app
    {:items [{:id 1 :name "Common Lisp"}
             {:id 2 :name "Clojure"}
-            {:id 3 :name "ClojureScript"}]}
+            {:id 3 :name "ClojureScript"}]
+    :item-scores {1 1.0, 2 1.0, 3 1.0}}
    {:target *container*})
   (is (not (clojure.string/blank? (.-innerHTML *container*)))))
 
