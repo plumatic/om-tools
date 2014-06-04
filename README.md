@@ -151,11 +151,11 @@ The map that's passed to `defcomponent` arg vector has the following keys:
 ```clojure
 (defcomponent progress-bar
   "A simple progress bar"
-  [[:data value total] owner]
+  [[:data value {min 0} {max 100}] owner]
   (render [_]
     (dom/div {:class "progress-bar"}
       (dom/span
-        {:style {:width (-> (/ current total)
+        {:style {:width (-> (/ value (- max min))
                             (* 100)
                             (int)
                             (str "%"))}}))))
@@ -178,22 +178,23 @@ normal ClojureScript data structures instead of properties.
 [Schema](https://github.com/Prismatic/schema) support.
 
 ```clojure
+(require '[schema.core :as s])
+
 (defschema ProgressBar
-  {:value number
-   :total number})
+  {:value s/Num
+   (s/optional-key :min) s/Num
+   (s/optional-key :max) s/Num})
 
 (defcomponent progress-bar
   "A simple progress bar"
-  [[:data value total] :- ProgressBar owner]
+  [[:data value {min 0} {max 100}] :- ProgressBar owner]
   (render [_]
     (dom/div {:class "progress-bar"}
       (dom/span
-        {:style {:width (-> (/ current total)
+        {:style {:width (-> (/ value (- max min))
                             (* 100)
                             (int)
                             (str "%"))}}))))
-
-(schema.core/set-fn-validation! true)
 
 ;; Throws error:
 (schema.macros/with-fn-validation
@@ -212,7 +213,7 @@ that conveniently wraps `om.core/get-state` and `om.core/set-state!`.
   (render [_]
     (dom/div {:class "progress-bar"}
       (dom/span
-        {:style {:width (-> (/ current total)
+        {:style {:width (-> (/ value (- max min))
                             (* 100)
                             (int)
                             (str "%"))}
