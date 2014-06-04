@@ -196,7 +196,8 @@ normal ClojureScript data structures instead of properties.
 (schema.core/set-fn-validation! true)
 
 ;; Throws error:
-(om/build progress-bar {:total 100 :value nil})
+(schema.macros/with-fn-validation
+  (om/build progress-bar {:total 100 :value nil}))
 ```
 
 ### State Proxy
