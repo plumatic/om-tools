@@ -1,8 +1,10 @@
-(defproject om-tools "0.1.0-SNAPSHOT"
-  :description "FIXME: write this!"
+(defproject prismatic/om-tools "0.1.0-SNAPSHOT"
+  :description "Tools for building expressive Om applications"
   :url "http://github.com/prismatic/om-tools"
+  :license {:name "Eclipse Public License - v 1.0"
+            :url "http://www.eclipse.org/legal/epl-v10.html"
+            :distribution :repo}
 
-  :profiles {:dev {:dependencies [[prismatic/dommy "0.1.2"]]}}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/clojurescript "0.0-2202"]
                  [com.keminglabs/cljx "0.3.1"]
@@ -14,6 +16,10 @@
             [lein-cljsbuild "1.0.3"]
             [com.cemerick/clojurescript.test "0.3.0"]]
 
+  :profiles {:dev {:dependencies [[prismatic/dommy "0.1.2"]]}}
+
+  :lein-release {:deploy-via :shell
+                 :shell ["lein" "deploy" "clojars"]}
   :cljx
   {:builds [{:source-paths ["src"]
              :output-path "target/generated/src"
