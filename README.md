@@ -203,7 +203,7 @@ normal ClojureScript data structures instead of properties.
   (om/build progress-bar {:total 100 :value nil}))
 ```
 
-### State Proxy
+### State Proxy (experimental)
 
 A component can use the key, `:state`, to access an atom-like object
 that conveniently wraps `om.core/get-state` and `om.core/set-state!`.
