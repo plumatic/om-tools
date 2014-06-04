@@ -2,6 +2,7 @@
   :description "FIXME: write this!"
   :url "http://github.com/prismatic/om-tools"
 
+  :profiles {:dev {:dependencies [[prismatic/dommy "0.1.2"]]}}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/clojurescript "0.0-2202"]
                  [com.keminglabs/cljx "0.3.1"]
@@ -38,4 +39,10 @@
                         :optimizations :whitespace
                         :pretty-print true
                         :preamble ["react/react.min.js"]
-                        :externs ["react/externs/react.js"]}}]})
+                        :externs ["react/externs/react.js"]}}
+            {:id "example/sliders"
+             :source-paths ["src" "target/generated/src" "examples/sliders/src"]
+             :compiler {:output-to "examples/sliders/main.js"
+                        :output-dir "examples/sliders/out"
+                        :source-map true
+                        :optimizations :none}}]})

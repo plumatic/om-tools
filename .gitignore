@@ -9,3 +9,5 @@ pom.xml
 .lein-plugins/
 .lein-failures
 .nrepl-port
+/examples/*/out/
+/examples/*/main.js
