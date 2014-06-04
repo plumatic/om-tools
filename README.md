@@ -69,7 +69,7 @@ elements. The main improvements include,
     You don't need to use the `#js` reader macro or `nil` for no
     attributes.
 *   More natural attribute names. We translate attributes like
-    `:class` to `:className` and `:onClick` to `:on-click`.
+    `:class` to `:className` and `:on-click` to `:onClick`.
 *   Children can be in collections. Not examplified here, but we have
     removed the need to `apply` a DOM function to its (flattened)
     children.
