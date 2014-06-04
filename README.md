@@ -84,6 +84,8 @@ The `defcomponent` macro builds upon the `component` macro by adding,
 *   Access to higher level abstractions, like a
     [state proxy](#state-proxy)
 
+You can find some [examples here](examples).
+
 ### Fnk-style Arguments
 
 The args vector of `(defcomponent component-name [args*] body)`,
