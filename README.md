@@ -211,7 +211,7 @@ that conveniently wraps `om.core/get-state` and `om.core/set-state!`.
 ```clojure
 (defcomponent progress-bar
   "A simple progress bar"
-  [[:data value total] state]
+  [[:data value {min 0} {max 100}] owner]
   (render [_]
     (dom/div {:class "progress-bar"}
       (dom/span
