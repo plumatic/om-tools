@@ -104,6 +104,6 @@
 #+cljs
 (defn class-set [m]
   "Returns a string of keys with truthy values joined together by spaces,
-   or returns nil when no truthy values. Naming comes from React."
+   or returns nil when no truthy values."
   (when-let [ks (->> m (filter val) keys (clojure.core/map name) distinct seq)]
     (str/join " " ks)))
