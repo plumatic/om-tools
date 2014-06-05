@@ -25,7 +25,7 @@
         el2-children (:children el2-props)]
 
     (is (= (dissoc el1-props :children)
-           (dissoc el1-props :children)))
+           (dissoc el2-props :children)))
 
     (cond
      (every? coll? [el1-children el2-children])
@@ -60,6 +60,10 @@
   (testing "simple opts"
     (is=el (dom/a {:href "/test"} "test")
            (om-dom/a #js {:href "/test"} "test")))
+
+  (testing "style map"
+    (is=el (dom/div {:style {:color "blue"}})
+           (om-dom/div #js {:style #js {:color "blue"}})))
 
   (testing "runtime template"
     (is=el (dom/a (when true {:href "/test"}) "test")

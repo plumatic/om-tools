@@ -8,6 +8,10 @@
   (:import
    [cljs.tagged_literals JSValue]))
 
+#+clj
+(defn clj->js [v]
+  (JSValue. v))
+
 (defn map-keys [f m]
   (into {} (for [[k v] m]
              [(f k) v])))
@@ -17,18 +21,31 @@
    s #"-(\w)"
    #(str/upper-case (second %))))
 
-(defn opt-alias [opt]
+(defn opt-key-alias [opt]
   (case opt
     :class :className
     :for :htmlFor
     opt))
 
-(defn format-opt [opt]
-  (-> opt
-      opt-alias
+(defn format-opt-key [opt-key]
+  (-> opt-key
+      opt-key-alias
       name
       camel-case
       keyword))
+
+(defn format-opt-style [opt]
+  (let [[k v] opt]
+    (if (= k :style)
+      [k (clj->js v)]
+      opt)))
+
+(defn format-opts [opts]
+  (->> opts
+       (map-keys format-opt-key)
+       (clojure.core/map format-opt-style)
+       (into {})
+       clj->js))
 
 (defn literal? [form]
   (not (or (symbol? form)
@@ -50,11 +67,14 @@
 (defn valid-opts? [opts]
   (or (nil? opts) (map? opts)))
 
+(defn element-args [opts children]
+  (if (valid-opts? opts)
+    [(when opts (format-opts opts)) children]
+    [nil (cons opts children)]))
+
 #+cljs
 (defn element [ctor opts children]
-  (let [[opts children] (if (valid-opts? opts)
-                          [(->> opts (map-keys format-opt) clj->js) children]
-                          [nil (cons opts children)])]
+  (let [[opts children] (element-args opts children)]
     (apply ctor (flatten (cons opts children)))))
 
 #+clj
@@ -62,9 +82,7 @@
   `(defmacro ~tag [opts# & children#]
      (let [ctor# '~(el-ctor tag)]
        (if (literal? opts#)
-         (let [[opts# children#] (if (valid-opts? opts#)
-                                   [(when opts# (JSValue. (map-keys format-opt opts#))) children#]
-                                   [nil (cons opts# children#)])]
+         (let [[opts# children#] (element-args opts# children#)]
            (cond
             (every? (complement possible-coll?) children#)
             `(~ctor# ~opts# ~@children#)
