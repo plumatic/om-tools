@@ -70,9 +70,35 @@ elements. The main improvements include,
     attributes.
 *   More natural attribute names. We translate attributes like
     `:class` to `:className` and `:on-click` to `:onClick`.
-*   Children can be in collections. Not examplified here, but we have
-    removed the need to `apply` a DOM function to its (flattened)
-    children.
+*   Children can be in collections, meaning you don't need `apply`
+    children to the element functions.
+
+With `om.dom`:
+
+```clojure
+(ns om-tools.readme
+  (:require [om.dom :as dom :include-macros true]))
+
+(dom/div
+  nil
+  (apply dom/ul #js {:className "a-list"}
+         (for [i (range 10)]
+           (dom/li #js {:style #js {:color "red"}}
+                   (str "Item " i)))))
+```
+
+With `om-tools.dom`:
+
+```clojure
+(ns om-tools.readme
+  (:require [om-tools.dom :as dom :include-macros true]))
+
+(dom/div
+  (dom/ul {:class "a-list"}
+          (for [i (range 10)]
+            (dom/li {:style {:color "red"}}
+                    (str "Item " i)))))
+```
 
 ### `defcomponent`
 
