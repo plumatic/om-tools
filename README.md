@@ -65,9 +65,9 @@ namespace.
 We built this to refine a few simple aspects of the base `om.dom`
 elements. The main improvements include,
 
-*   Attributes are optional not required to be JavaScript values.
-    You don't need to use the `#js` reader macro or `nil` for no
-    attributes.
+*   Attributes are not required to be JavaScript values and are
+    optional. You don't need to use the `#js` reader macro or `nil`
+    for no attributes.
 *   More natural attribute names. We translate attributes like
     `:class` to `:className` and `:on-click` to `:onClick`.
 *   Children can be in collections, meaning you don't need `apply`
