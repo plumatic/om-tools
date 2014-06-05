@@ -100,3 +100,10 @@
 
 #+clj
 (gen-om-dom-inline-fns)
+
+#+cljs
+(defn class-set [m]
+  "Returns a string of keys with truthy values joined together by spaces,
+   or returns nil when no truthy values. Naming comes from React."
+  (when-let [ks (->> m (filter val) keys (clojure.core/map name) distinct seq)]
+    (str/join " " ks)))
