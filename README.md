@@ -11,7 +11,7 @@ Leiningen dependency (Clojars): `[prismatic/om-tools "0.1.0"]`
 ## Introduction
 
 We wrote this library to avoid boilerplate and build higher-level
-abstractions on top of the Om's API.
+abstractions on top of the Om API.
 
 ### `component`
 
