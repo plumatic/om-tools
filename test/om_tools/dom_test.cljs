@@ -40,16 +40,38 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Tests
 
+(deftest class-set
+  (testing "nil when no truthy values"
+    (is (nil? (dom/class-set {})))
+    (is (nil? (dom/class-set {"foo" false})))
+    (is (nil? (dom/class-set {"foo" nil}))))
+
+  (testing "simple"
+    (is (= "foo" (dom/class-set {"foo" true}))))
+
+  (testing "class as keyword"
+    (is (= "foo" (dom/class-set {:foo true}))))
+
+  (testing "multiple classes"
+    (is (= "foo bar" (dom/class-set {:foo true :bar true}))))
+
+  (testing "duplicate classes"
+    (is (= "foo" (dom/class-set {:foo true "foo" true})))))
+
 (deftest element
   (testing "simple element"
     (is=el (dom/element js/React.DOM.a {:href "/"} ["foo" "bar"])
            (om-dom/a #js {:href "/"} "foo" "bar")))
+
   (testing "opt formatting"
     (is=el (dom/element js/React.DOM.a {:on-click println} "foo")
            (om-dom/a #js {:onClick println} "foo")))
-  (testing "opt alias"
+
+  (testing "class -> className"
     (is=el (dom/element js/React.DOM.a {:class "bar"} "foo")
-           (om-dom/a #js {:className "bar"} "foo"))
+           (om-dom/a #js {:className "bar"} "foo")))
+
+  (testing "for -> htmlFor"
     (is=el (dom/element js/React.DOM.label {:for "bar"} "foo")
            (om-dom/label #js {:htmlFor "bar"} "foo"))))
 
