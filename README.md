@@ -225,6 +225,11 @@ that conveniently wraps `om.core/get-state` and `om.core/set-state!`.
           (str value "/" total))))))
 ```
 
+It's important to note that while `state` looks and behaves like
+an `atom`, there is at least one minor difference: changes made by
+`swap!` and `reset!` are not immediately available if you `deref`
+in the same render phase.
+
 ## Community
 
 Please feel free to open an
