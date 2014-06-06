@@ -36,7 +36,7 @@ vanilla Om component:
 
 This is fairly simple, however as components get more complex and
 more components are introduced to the application, certain parts of
-this pattern get reptitive and distracting. Namely, `reify`ing a new
+this pattern get repetitive and distracting. Namely, `reify`ing a new
 object and specifying protocol/method pairs.
 
 Using the `component` macro, we can simply remove the reify and infer
