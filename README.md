@@ -46,7 +46,7 @@ that can go a long way to improve readability and reduce code size.
 ```clojure
 (ns om-tools.readme
   (:require
-    [om-tools.core :refer [component] :include-macros true]
+    [om-tools.core :refer-macros [component]]
     [om-tools.dom :as dom :include-macros true]))
 
 (defn welcome-component [data owner]
@@ -177,6 +177,10 @@ The map that's passed to `defcomponent` arg vector has the following keys:
 #### Example
 
 ```clojure
+(ns om-tools.readme
+  (:require
+    [om-tools.core :refer-macros [defcomponent]]))
+
 (defcomponent progress-bar
   "A simple progress bar"
   [[:data value {min 0} {max 100}] owner]
