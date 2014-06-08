@@ -16,7 +16,15 @@
             [lein-cljsbuild "1.0.3"]
             [com.cemerick/clojurescript.test "0.3.0"]]
 
-  :profiles {:dev {:dependencies [[prismatic/dommy "0.1.2"]]}}
+  :profiles {:dev {:dependencies [[prismatic/dommy "0.1.2"]]
+                   :cljsbuild
+                   {:builds
+                    [{:id "example/sliders"
+                      :source-paths ["src" "target/generated/src" "examples/sliders/src"]
+                      :compiler {:output-to "examples/sliders/main.js"
+                                 :output-dir "examples/sliders/out"
+                                 :source-map true
+                                 :optimizations :none}}]}}}
 
   :lein-release {:deploy-via :shell
                  :shell ["lein" "deploy" "clojars"]}
@@ -27,6 +35,8 @@
             {:source-paths ["src"]
              :output-path "target/generated/src"
              :rules :cljs}]}
+
+  :prep-tasks ["cljx" "javac" "compile"]
 
   :source-paths ["src" "target/generated/src"]
 
@@ -39,16 +49,10 @@
                            "test/vendor/console-polyfill.js"
                            "this.literal_js_was_evaluated=true"
                            "target/om_tools.js"]}
-   :builds [{:id "om-tools"
+   :builds [{:id "test"
              :source-paths ["src" "test" "target/generated/src"]
              :compiler {:output-to "target/om_tools.js"
                         :optimizations :whitespace
                         :pretty-print true
                         :preamble ["react/react.min.js"]
-                        :externs ["react/externs/react.js"]}}
-            {:id "example/sliders"
-             :source-paths ["src" "target/generated/src" "examples/sliders/src"]
-             :compiler {:output-to "examples/sliders/main.js"
-                        :output-dir "examples/sliders/out"
-                        :source-map true
-                        :optimizations :none}}]})
+                        :externs ["react/externs/react.js"]}}]})
