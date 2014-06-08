@@ -57,10 +57,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public
 
+#+cljs
 (defn state-proxy
   "Returns an atom-like object for reading and writing Om component state"
   [owner]
-  #+cljs
   (when owner
     (let [get-state #(om.core/get-state owner)]
       (reify
