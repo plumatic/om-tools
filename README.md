@@ -20,7 +20,7 @@ utilities frequently useful when building components.
 minimal runtime overhead to make the following improvements:
 
 
-*   Element attributes are not required to be a JavaScript value and are
+*   Element attributes are not required to be JavaScript values and are
     optional. You don't need to use the `#js` reader macro or `nil`
     for no attributes.
 *   More natural attribute names. We translate attributes like
@@ -113,8 +113,8 @@ Example of `defcomponent` including schema annotation:
 The `om-tools.core/defcomponentk` macro is similar to `defcomponent`,
 except that it uses [Plumbing][plumbing]'s `fnk` destructuring
 syntax for constructor arguments.
-The adds a succinct and declaritive mechanism for specifying the
-structure and requirements of component input data.
+This enables succinct and declaritive definition of the structure and
+requirements of component input data.
 
 It also provides additional useful utilities mentioned in
 [Component Inputs](#component-inputs).
@@ -144,8 +144,8 @@ default.
 Rather than defaulting to `nil`, if a key that's destructured is
 missing and no default value is specified, an error is thrown.
 
-By being explicit about component inputs, you are less error-prone and
-debugging is often easier because errors happen at the source.
+By being explicit about component inputs, we are less error-prone and
+debugging is often easier because errors happen closer to the source.
 
 #### Component Inputs
 
