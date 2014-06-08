@@ -50,3 +50,17 @@
           '(om-tools.core/component
             (init-state [this] {:count 0})
             (render [this] (om.dom/h1 nil (:text data))))))))
+
+(deftest possibly-destructured?-test
+  (are [form] (om-tools/possibly-destructured? :foo form)
+       '[foo]
+       '[foo bar]
+       '[bar foo]
+       '[[:foo bar]]
+       '[[:foo [:bar baz]]]
+       '[bar :as m])
+  (are [form] (not (om-tools/possibly-destructured? :foo form))
+       '[]
+       '[bar]
+       '[[:bar foo]]
+       '[[:bar :as foo]]))

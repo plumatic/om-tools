@@ -3,7 +3,7 @@
    [schema.macros :as sm])
   (:require
    [om-tools.schema :as schema]
-   [om-tools.core :as ot :include-macros true :refer [defcomponent]]
+   [om-tools.core :as ot :include-macros true :refer [defcomponentk]]
    [om-tools.dom :as dom :include-macros true]
    [schema.core :as s]
    [schema.test :as schema-test]
@@ -25,7 +25,7 @@
    :scores (schema/cursor ItemScores) ;; om.core/MapCursor
    :order s/Keyword})
 
-(defcomponent item-list [[:data items scores order] :- ItemList]
+(defcomponentk item-list [[:data items scores order] :- ItemList]
   (render [_]
     (let [comp-fn (if (= order :asc) compare (comp - compare))]
       (dom/ul
@@ -33,7 +33,7 @@
          (dom/li
           (str (:name item) "-" (get scores (:id item)))))))))
 
-(defcomponent app [[:data items item-scores] :- (schema/cursor App)]
+(defcomponentk app [[:data items item-scores] :- (schema/cursor App)]
   (render [_]
     (dom/div
      (om/build item-list

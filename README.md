@@ -1,82 +1,39 @@
 # om-tools
 
 A ClojureScript library of general-purpose tools for building applications with
-[om](https://github.com/swannodette/om) and [Facebook's React](http://facebook.github.io/react/)
+[Om](https://github.com/swannodette/om) and
+[Facebook's React](http://facebook.github.io/react/).
 
-Leiningen dependency (Clojars): `[prismatic/om-tools "0.1.1"]`
+Leiningen dependency (Clojars): `[prismatic/om-tools "0.2.0"]`
 
 **This is an alpha release. The API and organizational structure are
   subject to change. Comments and contributions are much appreciated.**
 
 ## Introduction
 
-We wrote this library to avoid boilerplate and build higher-level
-abstractions on top of the Om API.
+om-tools aims to provide higher-order abstractions and utilities frequently
+useful when building components with Om's API.
 
-### `component`
+## The `om-tools.dom` Namespace
 
-To illustrate our `component` macro, let's take a look at a very basic
-vanilla Om component:
+`om-tools.dom` mirrors the `om.dom` namespace while using macros and
+minimal runtime overhead to make the following improvements:
 
-```clojure
-(ns om-tools.readme
-  (:require
-    [om.core :as om]
-    [om.dom :as dom :include-macros true]))
 
-(defn welcome-component [data owner]
-  (reify
-    om/IInitState
-    (init-state [this]
-      {:some-state 1})
-    om/IRender
-    (render [this]
-      (dom/div #js {:className "welcome-msg"} "Welcome!"))))
-```
-
-This is fairly simple, however as components get more complex and
-more components are introduced to the application, certain parts of
-this pattern get repetitive and distracting. Namely, `reify`ing a new
-object and specifying protocol/method pairs.
-
-Using the `component` macro, we can simply remove the reify and infer
-the protocols from the method names. This is simple syntatic sugar
-that can go a long way to improve readability and reduce code size.
-
-```clojure
-(ns om-tools.readme
-  (:require
-    [om-tools.core :refer-macros [component]]
-    [om-tools.dom :as dom :include-macros true]))
-
-(defn welcome-component [data owner]
-  (component
-    (init-state [this]
-      {:some-state 1})
-    (render [this]
-      (dom/div {:class "welcome-msg"} "Welcome!"))))
-```
-
-### `om-tools.dom`
-
-Also displayed in the previous example was the `om-tools.dom`
-namespace.
-
-We built this to refine a few simple aspects of the base `om.dom`
-elements. The main improvements include,
-
-*   Attributes are not required to be JavaScript values and are
+*   Element attributes are not required to be JavaScript values and are
     optional. You don't need to use the `#js` reader macro or `nil`
     for no attributes.
 *   More natural attribute names. We translate attributes like
-    `:class` to `:className` and `:on-click` to `:onClick`.
-*   Children can be in collections, meaning you don't need `apply`
-    children to the element functions.
+    `:class` to `:className` and `:on-click` to `:onClick` to stay
+    consistent with Clojure naming conventions.
+*   Children can be in collections.  You don't need to use `apply` if
+    you have a sequence of children or use `concat` for combining
+    sequences of siblings.
 
-With `om.dom`:
+Example by comparison. First with `om.dom`:
 
 ```clojure
-(ns om-tools.readme
+(ns example
   (:require [om.dom :as dom :include-macros true]))
 
 (dom/div
@@ -87,10 +44,10 @@ With `om.dom`:
                    (str "Item " i)))))
 ```
 
-With `om-tools.dom`:
+And with `om-tools.dom`:
 
 ```clojure
-(ns om-tools.readme
+(ns example
   (:require [om-tools.dom :as dom :include-macros true]))
 
 (dom/div
@@ -100,124 +57,125 @@ With `om-tools.dom`:
                     (str "Item " i)))))
 ```
 
+## Component Macros
+
 ### `defcomponent`
 
-The `defcomponent` macro builds upon the `component` macro by adding,
+The `om-tools.core/defcomponent` macro defines Om component
+constructor functions.
+It has two main advantages over the ordinary `defn` & `reify`
+approach:
 
-*   Powerful map destructuring via our
-    [Plumbing](https://github.com/Prismatic/plumbing) library
-*   [Schema](https://github.com/Prismatic/schema) support
-*   Access to higher level abstractions, like a
-    [state proxy](#state-proxy)
+*   Adds [Schema][schema] support to specify and validate the data
+    when component is built.
 
-You can find some [examples here](examples).
+    One of React's most
+    [powerful features](https://speakerdeck.com/vjeux/why-does-react-scale-jsconf-2014)
+    is
+    [prop validation](http://facebook.github.io/react/docs/reusable-components.html#prop-validation),
+    which allows a component's author to document and validate which
+    properties a component requires and their types. This
+    functionality is not utilized in Om because we use normal
+    ClojureScript data structures as component inputs. However, with
+    more complex input structures, documentation and validation are
+    even more important.
 
-### Fnk-style Arguments
+    Schema annotations are optional and validation is disabled by
+    default.
+*   Removes boilerplate code around using `reify` to instantiate
+    objects with Om lifecycle methods. Component definitions become
+    much smaller and easier to read.
 
-The args vector of `(defcomponent component-name [args*] body)`,
-uses the
+Example of `defcomponent` including schema annotation:
+
+```clojure
+(ns example
+  (:require
+    [om-tools.core :refer-macros [defcomponent]]
+    [om-tools.dom :include-macros true]))
+
+(defcomponent counter [data :- {:init number} owner]
+  (will-mount [_]
+    (om/set-state! owner :n (:init data)))
+  (render-state [_ {:keys [n]}]
+    (dom/div
+      (dom/span (str "Count: " n))
+      (dom/button
+        {:on-click #(om/set-state! owner :n (inc n))}
+        "+")
+      (dom/button
+        {:on-click #(om/set-state! owner :n (dec n))}
+        "-")))))
+```
+
+### `defcomponentk`
+
+The `om-tools.core/defcomponentk` macro is similar to `defcomponent`,
+except that it uses [Plumbing][plumbing]'s `fnk` destructuring
+syntax for constructor arguments.
+This enables succinct and declaritive definition of the structure and
+requirements of component input data.
+
+It also provides additional useful utilities mentioned in
+[Component Inputs](#component-inputs).
+
+#### Fnk-style Arguments
+
+The args vector of `defcomponentk` uses
 [Fnk syntax](https://github.com/Prismatic/plumbing/tree/master/src/plumbing/fnk#fnk-syntax)
 that's optimized for destructuring (nested) maps with keyword keys.
-It is the same pattern used in our
+It is the similar pattern used in our
 [Fnhouse](https://github.com/Prismatic/fnhouse) library to
 expressively declare HTTP handlers.
-Do not worry if you are unfamiliar with it; it's similar to
-ordinary Clojure map destructuring, but more concise for nested maps
-and specifying default values.
 
-Here's a small comparison to default Clojure map destructuring of 4
-keys, `k1`,`k2`,`k4` and `k5` where `k5` defaults to 5, and aliasing
-the map to `m`:
+If you are unfamiliar with this syntax, here are some quick comparisons
+to default Clojure map destructuring.
 
 ```clojure
-  Input: {:k1 1 :k2 2 :k3 {:k4 4}}
-Default: {:keys [k1 k2] {:keys [k4 k5] :or {k5 5}} :k3 :as m}
-    Fnk: [k1 k2 [:k3 k4 {k5 5}] :as m]
+{:keys [foo bar]}                    :: [foo bar]
+{:keys [foo bar] :as m}              :: [foo bar :as m]
+{:keys [foo bar] :or {bar 21}}       :: [foo {bar 21}]
+{{:keys [baz qux]} :foo :keys [bar]} :: [[:foo [baz qux]] bar]
 ```
 
-Another quick example:
-
-```clojure
-(use 'plumbing.core)
-
-(defnk foo [x y] (+ x y))
-
-(foo {:x 4 :y 2}) ;; => 6
-
-(defnk bar [[:x a b] [:y c {d 0}]]
-  (+ a b c d))
-
-(bar {:x {:a 3 :b 4} :y {:c 5}}) ;; => 12
-(bar {:x {:a 3 :b 4} :y {:c 5 :d -12}}) ;; => 0
-```
-
-An important distinction between Clojure's default destructuring
-and Fnk-style is that specified keys are required by default.
+However, an important distinction between Clojure's default
+destructuring and Fnk-style is that specified keys are required by
+default.
 Rather than defaulting to `nil`, if a key that's destructured is
 missing and no default value is specified, an error is thrown.
 
-```clojure
-;; Throws error: missing y
-(foo {:x 1})
-```
+By being explicit about component inputs, we are less error-prone and
+debugging is often easier because errors happen closer to the source.
 
-By being explicit about your component's inputs, you are less
-error-prone and debugging is often easier because errors happen
-at the source.
+#### Component Inputs
 
-### Component Inputs
+The map that's passed to `defcomponentk` arg vector has the following
+keys:
 
-The map that's passed to `defcomponent` arg vector has the following keys:
-
-*   `:data`  The data (cursor) passed to component when built
-*   `:owner` The backing React component
-*   `:opts`  The optional map of options passed when built
-*   `:state` An atom-like object for convenience to om.core/get-state and om.core/set-state!
+| Key       | Description
+| --------- |-------------------------------------------------------------------
+| `:data`   | The data (cursor) passed to component when built
+| `:owner`  | The backing React component
+| `:opts`   | The optional map of options passed when built
+| `:shared` | The map of globally shared data from om.core/get-shared
+| `:state`  | An atom-like object for convenience to om.core/get-state and om.core/set-state!
 
 #### Example
 
 ```clojure
-(ns om-tools.readme
+(ns example
+  (:require-macros
+    [schema.macros :refer [defschema]]
+    [om-tools.core :refer [defcomponentk]])
   (:require
-    [om-tools.core :refer-macros [defcomponent]]))
-
-(defcomponent progress-bar
-  "A simple progress bar"
-  [[:data value {min 0} {max 100}] owner]
-  (render [_]
-    (dom/div {:class "progress-bar"}
-      (dom/span
-        {:style {:width (-> (/ value (- max min))
-                            (* 100)
-                            (int)
-                            (str "%"))}}))))
-
-```
-
-### Schema Support
-
-One of React's most
-[powerful features](https://speakerdeck.com/vjeux/why-does-react-scale-jsconf-2014)
-is
-[prop validation](http://facebook.github.io/react/docs/reusable-components.html#prop-validation),
-which allows a component's author to document and enforce which properties
-a component requires and their types.
-However, this functionality is not utilized in Om because we use
-normal ClojureScript data structures instead of properties.
-
-`defcomponent` returns this functionality via
-[Plumbing's](https://github.com/Prismatic/plumbing)
-[Schema](https://github.com/Prismatic/schema) support.
-
-```clojure
-(require '[schema.core :as s])
+    [om.core :as om]))
 
 (defschema ProgressBar
-  {:value s/Num
-   (s/optional-key :min) s/Num
-   (s/optional-key :max) s/Num})
+  {:value number
+   (s/optional-key :min) number
+   (s/optional-key :max) number})
 
-(defcomponent progress-bar
+(defcomponentk progress-bar
   "A simple progress bar"
   [[:data value {min 0} {max 100}] :- ProgressBar owner]
   (render [_]
@@ -227,19 +185,32 @@ normal ClojureScript data structures instead of properties.
                             (* 100)
                             (int)
                             (str "%"))}}))))
+```
 
-;; Throws error:
+```clojure
+;; Valid
+(om/root progress-bar {:value 42}
+  {:target (. js/document (getElementById "app"))})
+
+;; Throws error: Key :value not found in (:wrong-data)
+(om/root progress-bar {:wrong-data true}
+  {:target (. js/document (getElementById "app"))})
+
+;; Throws error: Value does not match schema
 (schema.macros/with-fn-validation
-  (om/build progress-bar {:total 100 :value nil}))
+  (om/root progress-bar {:value "42"}
+    {:target (. js/document (getElementById "app"))})
 ```
 
 ### State Proxy (experimental)
 
-A component can use the key, `:state`, to access an atom-like object
-that conveniently wraps `om.core/get-state` and `om.core/set-state!`.
+A component using `defcomponntk` can use the key, `:state`, to access
+an atom-like object that conveniently wraps `om.core/get-state` and
+`om.core/set-state!` so that we can read and write state idiomatically
+with `deref`, `reset!` and `swap!`.
 
 ```clojure
-(defcomponent progress-bar
+(defcomponentk progress-bar
   "A simple progress bar"
   [[:data value {min 0} {max 100}] state]
   (render [_]
@@ -275,3 +246,7 @@ please see CONTRIBUTING.md in the repo root for guidelines.
 
 Copyright (C) 2014 Prismatic and Contributors. Distributed under the Eclipse
 Public License, the same as Clojure.
+
+[schema]: https://github.com/Prismatic/schema
+[plumbing]: https://github.com/Prismatic/plumbing
+[om]: https://github.com/swannodette/om
