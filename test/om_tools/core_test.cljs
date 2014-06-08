@@ -1,10 +1,12 @@
 (ns om-tools.core-test
   (:require-macros
    [cemerick.cljs.test :refer [is are deftest testing use-fixtures done]]
+   [om-tools.test-utils :refer [with-element]]
    [schema.macros :as sm])
   (:require
    cemerick.cljs.test
-   [om-tools.core :as om-tools :refer-macros [defcomponent defcomponentk]]
+   [clojure.set :as set]
+   [om-tools.core :as om-tools :refer-macros [defcomponent defcomponentk defmixin]]
    [om-tools.dom :as dom :include-macros true]
    [om.core :as om]
    [schema.core :as s]
@@ -58,6 +60,8 @@
   (testing "build constructor"
     (is (composite-component? (->test-component {:foo "foo" :bar "bar"})))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defcomponentk test-componentk
   [[:data foo bar] :- TestComponent owner]
   (display-name [_] (str foo bar "!"))
@@ -95,19 +99,22 @@
   (testing "build constructor"
     (is (composite-component? (->test-componentk {:foo "foo" :bar "bar"})))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defcomponentk shared-data-component
   [[:shared api-host api-version]]
   (render [_]
     (dom/div (str api-host "/" api-version))))
 
 (deftest defcomponentk-shared-test
-  (let [e (.createElement js/document "div")]
-    (.. js/document -body (appendChild e))
+  (with-element [e "div"]
     (om/root shared-data-component {}
              {:target e
               :shared {:api-host "api.example.com"
                        :api-version "1.5"}})
     (is (= "api.example.com/1.5" (.-innerText e)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defcomponentk stateful-component [data state]
   (did-mount [_]
@@ -128,39 +135,11 @@
      (fn []
        (testing "swapped on state"
          (is (= "x=6,y=2" (.-innerText e))))
-       (done))
+       (done)
+       (.. js/document -body (removeChild e)))
      60)))
 
-(deftest set-state?!-test
-  (let [mem (atom {})
-        calls (atom {})
-        owner (reify
-                om/IGetState
-                (-get-state [this]
-                  @mem)
-                (-get-state [this ks]
-                  (get-in @mem ks))
-                om/ISetState
-                (-set-state! [this val]
-                  (swap! calls update-in [::root] (fnil inc 0))
-                  (reset! mem val))
-                (-set-state! [this ks val]
-                  (swap! calls update-in ks (fnil inc 0))
-                  (swap! mem assoc-in ks val)))]
-    (is (not (nil? (om-tools/set-state?! owner {:bar "bar"}))))
-    (is (= 1 (::root @calls)))
-    (is (nil? (om-tools/set-state?! owner {:bar "bar"})))
-    (is (= 1 (::root @calls)))
-    (is (not (nil? (om-tools/set-state?! owner :foo "foo"))))
-    (is (= 1 (:foo @calls)))
-    (is (nil? (om-tools/set-state?! owner :foo "foo")))
-    (is (= 1 (:foo @calls)))
-    (is (not (nil? (om-tools/set-state?! owner :foo "foo2"))))
-    (is (= 2 (:foo @calls)))
-    (is (not (nil? (om-tools/set-state?! owner [:baz :qux] 42))))
-    (is (= 1 (get-in @calls [:baz :qux])))
-    (is (nil? (om-tools/set-state?! owner [:baz :qux] 42)))
-    (is (= 1 (get-in @calls [:baz :qux])))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defcomponent component-with-docstring
   "component docstring"
@@ -214,5 +193,111 @@
        componentk-with-attr-map
        componentk-with-docstring-and-attr-map
        componentk-with-prepost-map))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmixin test-mixin
+  (display-name [] :display-name)
+  (init-state [] :init-state)
+  (should-update [_ _] :should-update)
+  (will-mount [] :will-mount)
+  (did-mount [] :did-mount)
+  (will-unmount [] :will-unmount)
+  (will-update [_ _] :will-update)
+  (did-update [_ _] :did-update)
+  (will-receive-props [_] :will-receive-props))
+
+(deftest defmixin-test
+  (is (object? test-mixin))
+  (is (= #{"getDisplayName"
+           "getInitialState"
+           "shouldComponentUpdate"
+           "componentWillMount"
+           "componentDidMount"
+           "componentWillUnmount"
+           "componentWillUpdate"
+           "componentDidUpdate"
+           "componentWillReceiveProps"}
+         (set (js-keys test-mixin))))
+  (is (every? fn? (map #(aget test-mixin %) (js-keys test-mixin))))
+  (is :display-name
+      (.getDisplayName test-mixin))
+  (is :init-state
+      (.getInitialState test-mixin))
+  (is :should-update
+      (.shouldComponentUpdate test-mixin nil nil))
+  (is :will-mount
+      (.componentWillMount test-mixin))
+  (is :did-mount
+      (.componentDidMount test-mixin))
+  (is :will-unmount
+      (.componentWillUnmount test-mixin))
+  (is :will-update
+      (.componentWillUpdate test-mixin nil nil))
+  (is :did-update
+      (.componentDidUpdate test-mixin nil nil))
+  (is :will-receive-props
+      (.componentWillReceiveProps test-mixin nil)))
+
+(defmixin test-mixin2
+  (will-mount [] (this-as this
+                   (om/set-state! this :mixin-mounted? true))))
+
+(defcomponent component-with-mixin [data owner]
+  (:mixins [test-mixin2])
+  (render-state [_ {:keys [mixin-mounted?]}]
+    (dom/div nil (if mixin-mounted?
+                   "mixin-mounted"))))
+
+(defcomponent wrapper-component-with-mixin [data owner]
+  (render [_]
+    (->component-with-mixin {})))
+
+(deftest defcomponent-defmixin-test
+  (is (fn? component-with-mixin$ctor))
+  (with-element [e "div"]
+    (om/root component-with-mixin {}
+             {:target e
+              :ctor component-with-mixin$ctor})
+    (is (= "mixin-mounted" (.-innerText e))))
+  (with-element [e "div"]
+    (om/root wrapper-component-with-mixin {}
+             {:target e})
+    (is (= "mixin-mounted" (.-innerText e)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(deftest set-state?!-test
+  (let [mem (atom {})
+        calls (atom {})
+        owner (reify
+                om/IGetState
+                (-get-state [this]
+                  @mem)
+                (-get-state [this ks]
+                  (get-in @mem ks))
+                om/ISetState
+                (-set-state! [this val]
+                  (swap! calls update-in [::root] (fnil inc 0))
+                  (reset! mem val))
+                (-set-state! [this ks val]
+                  (swap! calls update-in ks (fnil inc 0))
+                  (swap! mem assoc-in ks val)))]
+    (is (not (nil? (om-tools/set-state?! owner {:bar "bar"}))))
+    (is (= 1 (::root @calls)))
+    (is (nil? (om-tools/set-state?! owner {:bar "bar"})))
+    (is (= 1 (::root @calls)))
+    (is (not (nil? (om-tools/set-state?! owner :foo "foo"))))
+    (is (= 1 (:foo @calls)))
+    (is (nil? (om-tools/set-state?! owner :foo "foo")))
+    (is (= 1 (:foo @calls)))
+    (is (not (nil? (om-tools/set-state?! owner :foo "foo2"))))
+    (is (= 2 (:foo @calls)))
+    (is (not (nil? (om-tools/set-state?! owner [:baz :qux] 42))))
+    (is (= 1 (get-in @calls [:baz :qux])))
+    (is (nil? (om-tools/set-state?! owner [:baz :qux] 42)))
+    (is (= 1 (get-in @calls [:baz :qux])))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-fixtures :once schema-test/validate-schemas)
