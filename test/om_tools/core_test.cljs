@@ -199,13 +199,13 @@
 (defmixin test-mixin
   (display-name [] :display-name)
   (init-state [] :init-state)
-  (should-update [_ _] :should-update)
+  (should-update [x y] [:should-update x y])
   (will-mount [] :will-mount)
   (did-mount [] :did-mount)
   (will-unmount [] :will-unmount)
-  (will-update [_ _] :will-update)
-  (did-update [_ _] :did-update)
-  (will-receive-props [_] :will-receive-props))
+  (will-update [x y] [:will-update x y])
+  (did-update [x y] [:did-update x y])
+  (will-receive-props [x] [:will-receive-props x]))
 
 (deftest defmixin-test
   (is (object? test-mixin))
@@ -220,24 +220,24 @@
            "componentWillReceiveProps"}
          (set (js-keys test-mixin))))
   (is (every? fn? (map #(aget test-mixin %) (js-keys test-mixin))))
-  (is :display-name
-      (.getDisplayName test-mixin))
-  (is :init-state
-      (.getInitialState test-mixin))
-  (is :should-update
-      (.shouldComponentUpdate test-mixin nil nil))
-  (is :will-mount
-      (.componentWillMount test-mixin))
-  (is :did-mount
-      (.componentDidMount test-mixin))
-  (is :will-unmount
-      (.componentWillUnmount test-mixin))
-  (is :will-update
-      (.componentWillUpdate test-mixin nil nil))
-  (is :did-update
-      (.componentDidUpdate test-mixin nil nil))
-  (is :will-receive-props
-      (.componentWillReceiveProps test-mixin nil)))
+  (is (= :display-name
+         (.getDisplayName test-mixin)))
+  (is (= :init-state
+         (.getInitialState test-mixin)))
+  (is (= [:should-update :next-props :next-state]
+         (.shouldComponentUpdate test-mixin :next-props :next-state)))
+  (is (= :will-mount
+         (.componentWillMount test-mixin)))
+  (is (= :did-mount
+         (.componentDidMount test-mixin)))
+  (is (= :will-unmount
+         (.componentWillUnmount test-mixin)))
+  (is (= [:will-update :next-props :next-state]
+         (.componentWillUpdate test-mixin :next-props :next-state)))
+  (is (= [:did-update :prev-props :prev-state]
+         (.componentDidUpdate test-mixin :prev-props :prev-state)))
+  (is (= [:will-receive-props :next-props]
+         (.componentWillReceiveProps test-mixin :next-props))))
 
 (defmixin test-mixin2
   (will-mount [] (this-as this
