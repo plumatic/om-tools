@@ -158,6 +158,8 @@
    instance. Follows the same pattern as plumbing.core/defnk, except that
    the body is a set of Om lifecycle-method implementations.
 
+   See defcomponent doc-string for supported lifecycle-methods.
+
    The arguments receive a map with the following keys:
     :data   The data (cursor) passed to component when built
     :owner  The backing React component
@@ -165,18 +167,6 @@
     :shared The map of globally shared values
     :state  An atom-like object for convenience to om.core/get-state and
             om.core/set-state!
-
-   The following lifecycle methods are supported:
-    - display-name
-    - init-state
-    - should-update
-    - will-mount
-    - did-mount
-    - will-unmount
-    - did-update
-    - will-receive-props
-    - render
-    - render-state
 
    In addition, a factory function will be defined: ->component-name,
    to wrap a call to om.core/build, providing any defaults.
