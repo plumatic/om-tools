@@ -32,23 +32,39 @@
        (some #(and (vector? %) (= k (first %))) args))))
 
 #+clj
+(def ^:private component-protocols
+  {'display-name       `om/IDisplayName
+   'init-state         `om/IInitState
+   'should-update      `om/IShouldUpdate
+   'will-mount         `om/IWillMount
+   'did-mount          `om/IDidMount
+   'will-unmount       `om/IWillUnmount
+   'will-update        `om/IWillUpdate
+   'did-update         `om/IDidUpdate
+   'will-receive-props `om/IWillReceiveProps
+   'render             `om/IRender
+   'render-state       `om/IRenderState})
+
+#+clj
+(def ^:private mixin-methods
+  {'display-name       :getDisplayName
+   'init-state         :getInitialState
+   'should-update      :shouldComponentUpdate
+   'will-mount         :componentWillMount
+   'did-mount          :componentDidMount
+   'will-unmount       :componentWillUnmount
+   'will-update        :componentWillUpdate
+   'did-update         :componentDidUpdate
+   'will-receive-props :componentWillReceiveProps})
+
+#+clj
 (defn add-component-protocols [forms]
-  (let [protocols {'display-name       `om/IDisplayName
-                   'init-state         `om/IInitState
-                   'should-update      `om/IShouldUpdate
-                   'will-mount         `om/IWillMount
-                   'did-mount          `om/IDidMount
-                   'will-unmount       `om/IWillUnmount
-                   'will-update        `om/IWillUpdate
-                   'did-update         `om/IDidUpdate
-                   'will-receive-props `om/IWillReceiveProps
-                   'render             `om/IRender
-                   'render-state       `om/IRenderState}]
-    (mapcat (fn [form]
-              (if-let [protocol (when (seq? form) (protocols (first form)))]
-                [protocol form]
-                [form]))
-            forms)))
+  (mapcat
+   (fn [form]
+     (if-let [protocol (when (seq? form) (component-protocols (first form)))]
+       [protocol form]
+       [form]))
+   forms))
 
 #+clj
 (defn convenience-constructor [f ctor-sym]
@@ -62,18 +78,6 @@
                     ~(if ctor-sym
                        `(merge {:ctor ~ctor-sym} ~map-sym)
                        map-sym))))))
-
-#+clj
-(def mixin-methods
-  {'display-name       :getDisplayName
-   'init-state         :getInitialState
-   'should-update      :shouldComponentUpdate
-   'will-mount         :componentWillMount
-   'did-mount          :componentDidMount
-   'will-unmount       :componentWillUnmount
-   'will-update        :componentWillUpdate
-   'did-update         :componentDidUpdate
-   'will-receive-props :componentWillReceiveProps})
 
 #+clj
 (defn mixin-constructor [f mixins]
