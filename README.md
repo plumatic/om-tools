@@ -231,6 +231,61 @@ an `atom`, there is at least one minor difference: changes made by
 `swap!` and `reset!` are not immediately available if you `deref`
 in the same render phase.
 
+## Mixins
+
+React provides [mixin functionality][react-mixin] to handle
+cross-cutting concerns and allow highly reusable component behaviors.
+While [mixins are possible with Om][om-mixin], it does not provide
+much functionality to support this React feature.
+One issue is that you must create a React constuctor and specify it
+each time the component is built.
+This puts the responsibility of using mixins on both the component
+(create a constructor) and its parent (specify the constructor).
+Another issue is having to drop down to raw JavaScript functions,
+breaking you out of Om's data and state abstractions.
+
+om-tools provides a `defmixin` macro in the `om-tools.mixin` namespace
+to define mixins. The syntax of `defmixin` follows same pattern as the
+component macros.
+
+One last thing: the convenience builders created by
+`defcomponent`/`defcomponentk` (ie `(->tick-tock data)`)
+encapsulate any custom constructor automatically. So a parent
+component no longer needs to be aware when a child uses mixins!
+
+Here's how you could reimplement [React's mixin example][react-mixin]:
+
+```clojure
+(ns example
+  (:require
+    [om-tools.core :refer-macros [defcomponentk]
+    [om-tools.dom :as dom :include-macros true]
+    [om-tools.mixin :refer-macros [defmixin]]))
+
+(defmixin set-interval-mixin
+  (will-mount [owner]
+    (set! (. owner -intervals) #js []))
+  (will-unmount [owner]
+    (.. owner -intervals (map js/clearInterval)))
+  (set-interval [owner f t]
+    (.. owner -intervals (push (js/setInterval f t)))))
+
+(defcomponentk tick-tock [owner state]
+  (:mixins set-interval-mixin)
+  (init-state [_]
+    {:seconds 0})
+  (did-mount [_]
+    (.set-interval owner #(swap! state update-in [:seconds] inc) 1000))
+  (render [_]
+    (dom/p
+      (str "React has been running for " (:seconds @state) " seconds.")))
+
+(. js/React
+   (renderComponent
+     (->tick-tock {})
+     (. js/document (getElementById "example"))))
+```
+
 ## Community
 
 Please feel free to open an
@@ -250,3 +305,5 @@ Public License, the same as Clojure.
 [schema]: https://github.com/Prismatic/schema
 [plumbing]: https://github.com/Prismatic/plumbing
 [om]: https://github.com/swannodette/om
+[react-mixin]: http://facebook.github.io/react/docs/reusable-components.html#mixins
+[om-mixin]: https://github.com/swannodette/om/blob/master/examples/mixins/src/core.cljs
