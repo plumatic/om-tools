@@ -32,7 +32,10 @@
    'render-state       `om/IRenderState})
 
 #+clj
-(defn add-component-protocols [forms]
+(defn add-component-protocols
+  "Returns forms after adding appropriate Om protocols before any
+  recognized lifecycle method names."
+  [forms]
   (mapcat
    (fn [form]
      (if-let [protocol (when (seq? form) (component-protocols (first form)))]
@@ -41,19 +44,30 @@
    forms))
 
 #+clj
-(defn convenience-constructor [f ctor-sym]
+(defn convenience-constructor
+  "Returns quoted form that defs a function which calls om.core/build
+  on Om component constructor, f. Function will be named the same as
+  component constructor, but prefixed with \"->\" (like defrecord
+  factory function). If ctor-sym is a symbol, it is merged into build
+  options map as :ctor"
+  [f ctor-sym]
   (let [map-sym (gensym "m")]
     `(defn ~(symbol (str "->" (name f)))
        ([cursor#]
           (om/build ~f cursor#
-                    ~@(when ctor-sym [{:ctor ctor-sym}])))
+                    ~@(when (symbol? ctor-sym)
+                        [{:ctor ctor-sym}])))
        ([cursor# ~map-sym]
           (om/build ~f cursor#
-                    ~(if ctor-sym
+                    ~(if (symbol? ctor-sym)
                        `(merge {:ctor ~ctor-sym} ~map-sym)
                        map-sym))))))
 #+clj
-(defn mixin-constructor [f mixins]
+(defn mixin-constructor
+  "Returns quoted form that defs a custom React constructor with
+  mixins for Om component constructor, f. Constructor will be named
+  same as component constructor, but suffixed with \"$ctor\""
+  [f mixins]
   (when (seq mixins)
     (let [ctor-sym (symbol (str (name f) "$ctor"))]
       [ctor-sym
@@ -63,17 +77,54 @@
             (. js/React (~'createClass obj#))))])))
 
 #+clj
-(defn separate-component-config [forms]
-  (let [opt? #(and (seq? %) (keyword? (first %)))]
-    [(->> (filter opt? forms) (map (juxt first rest)) (into {}))
-     (remove opt? forms)]))
+(defn component-option?
+  "Returns true if quoted form matches pattern of component option
+  within defcomponent(k) body, otherwise false. Options are seqs that
+  start with keywords."
+  [form]
+  (and (seq? form) (keyword? (first form))))
+
+#+clj
+(defn separate-component-config
+  "Returns tuple of [options-map other-forms] from forms within
+  defcomponent(k) macro body. Options-map is a map of option keyword
+  to sequence of values; other-forms is sequence of all other
+  non-option forms."
+  [forms]
+  (let [[option-forms other-forms] ((juxt filter remove) component-option? forms)]
+    [(into {} (map (juxt first rest) option-forms))
+     other-forms]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; defcomponent/k validation
+
+#+clj
+(defn valid-component-form? [form]
+  (or (and (seq? form)
+           (symbol? (first form))
+           (vector? (second form))
+           (<= 1 (count (second form))))
+      (symbol? form)))
+
+#+clj
+(defn assert-valid-component
+  "Throws IllegalArgumentException if component body is malformed."
+  [body]
+  (when-let [invalid-form (first (remove valid-component-form? body))]
+    (throw (IllegalArgumentException.
+            "Unexpected form in body of component: " invalid-form))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public
 
 #+cljs
 (defn state-proxy
-  "Returns an atom-like object for reading and writing Om component state"
+  "Returns an atom-like object for reading and writing Om component
+   state.
+
+   Note: Behavior may exactly not match atoms when deref'ing
+   immediately following a reset!/swap! because Om processes state
+   changes asynchronously in separate render phases."
   [owner]
   (when owner
     (let [get-state #(om/get-state owner)]
@@ -121,6 +172,7 @@
    Everything inside body is within an implicit reify; any other non-Om protocols
    can be specified if needed."
   [& body]
+  (assert-valid-component body)
   `(reify ~@(add-component-protocols body)))
 
 (defmacro defcomponent

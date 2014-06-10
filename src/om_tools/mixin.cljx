@@ -22,7 +22,14 @@
 
 #+clj
 (do
-  (defmulti mixin-method-body (fn [method orig-body] method))
+  (defmulti mixin-method-body
+    "Returns quoted form for a function in React mixin object. Takes the
+    method-name and rest of body from the defmixin macro and dispatches
+    on method-name. All defmixin methods are expected to take an
+    additional first argument of `this`, so returned functions should
+    take one less argument than what's given in method-body and call
+    original with `this` as first argument."
+    (fn [method orig-body] method))
 
   (defmethod mixin-method-body :default
     [method orig-body]
@@ -35,6 +42,8 @@
   (doseq [method ['should-update 'will-update]]
     (defmethod mixin-method-body method
       [method orig-body]
+      (assert (= 3 (count (first orig-body)))
+              (str "Invalid mixin: " method " should have 3 arguments: owner, next-props, next-state"))
       (let [this-sym (gensym "this")
             next-props-sym (gensym "next-props")]
         `(fn [~next-props-sym next-state#]
@@ -46,6 +55,8 @@
 
   (defmethod mixin-method-body 'did-update
     [method orig-body]
+    (assert (= 3 (count (first orig-body)))
+            "Invalid mixin: did-update should have 3 arguments: owner, prev-props, prev-state")
     (let [this-sym (gensym "this")
           prev-props-sym (gensym "prev-props")]
       `(fn [~prev-props-sym next-state#]
@@ -58,6 +69,8 @@
 
   (defmethod mixin-method-body 'will-receive-props
     [method orig-body]
+    (assert (= 2 (count (first orig-body)))
+            "Invalid mixin: will-receive-props should have 2 arguments: owner, next-props")
     (let [this-sym (gensym "this")
           next-props-sym (gensym "next-props")]
       `(fn [~next-props-sym]
@@ -65,6 +78,25 @@
            ((fn ~@orig-body)
             ~this-sym
             (om/get-props ~(JSValue. {:props next-props-sym}))))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; defmixin validation
+
+#+clj
+(defn- valid-mixin-form? [[method-name args :as form]]
+  (and (seq? form)
+       (symbol? method-name)
+       (vector? args)
+       (<= 1 (count args))))
+
+#+clj
+(defn- assert-valid-mixin
+  "Throws IllegalArgumentException if mixin malformed"
+  [name body]
+  (when-not (symbol? name)
+    (throw (IllegalArgumentException. "Invalid mixin name")))
+  (when-let [invalid-form (first (remove valid-mixin-form? body))]
+    (throw (IllegalArgumentException. (str "Unexpected form in mixin body: " invalid-form)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public
@@ -97,8 +129,7 @@
    :added "0.2.0"}
   [name & args]
   (let [[doc-string? body] (util/maybe-split-first string? args)]
-    (assert (every? seq? body) "Invalid mixin form")
-    (assert (every? #(and (>= (count %) 2) (vector? (second %))) body) "Invalid mixin method form")
+    (assert-valid-mixin name body)
     (let [kvs  (map (fn [[method & method-body]]
                       [(or (get mixin-methods method)
                            (munge (str method)))

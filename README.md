@@ -278,7 +278,7 @@ Here's how you could reimplement [React's mixin example][react-mixin]:
     (.set-interval owner #(swap! state update-in [:seconds] inc) 1000))
   (render [_]
     (dom/p
-      (str "React has been running for " (:seconds @state) " seconds.")))
+      (str "React has been running for " (:seconds @state) " seconds."))))
 
 (. js/React
    (renderComponent
