@@ -27,7 +27,7 @@
   (defmethod mixin-method-body :default
     [method orig-body]
     (let [this-sym (gensym "this")
-          args (map gensym (first orig-body))]
+          args (map gensym (next (first orig-body)))]
       `(fn [~@args]
          (cljs.core/this-as ~this-sym
            ((fn ~@orig-body) ~@(cons this-sym args))))))
