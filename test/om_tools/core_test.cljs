@@ -6,7 +6,7 @@
   (:require
    cemerick.cljs.test
    [clojure.set :as set]
-   [om-tools.core :as om-tools :refer-macros [defcomponent defcomponentk defmixin]]
+   [om-tools.core :as om-tools :refer-macros [defcomponent defcomponentk]]
    [om-tools.dom :as dom :include-macros true]
    [om.core :as om]
    [schema.core :as s]
@@ -195,75 +195,6 @@
        componentk-with-prepost-map))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defmixin test-mixin
-  (display-name [] :display-name)
-  (init-state [] :init-state)
-  (should-update [x y] [:should-update x y])
-  (will-mount [] :will-mount)
-  (did-mount [] :did-mount)
-  (will-unmount [] :will-unmount)
-  (will-update [x y] [:will-update x y])
-  (did-update [x y] [:did-update x y])
-  (will-receive-props [x] [:will-receive-props x]))
-
-(deftest defmixin-test
-  (is (object? test-mixin))
-  (is (= #{"getDisplayName"
-           "getInitialState"
-           "shouldComponentUpdate"
-           "componentWillMount"
-           "componentDidMount"
-           "componentWillUnmount"
-           "componentWillUpdate"
-           "componentDidUpdate"
-           "componentWillReceiveProps"}
-         (set (js-keys test-mixin))))
-  (is (every? fn? (map #(aget test-mixin %) (js-keys test-mixin))))
-  (is (= :display-name
-         (.getDisplayName test-mixin)))
-  (is (= :init-state
-         (.getInitialState test-mixin)))
-  (is (= [:should-update :next-props :next-state]
-         (.shouldComponentUpdate test-mixin :next-props :next-state)))
-  (is (= :will-mount
-         (.componentWillMount test-mixin)))
-  (is (= :did-mount
-         (.componentDidMount test-mixin)))
-  (is (= :will-unmount
-         (.componentWillUnmount test-mixin)))
-  (is (= [:will-update :next-props :next-state]
-         (.componentWillUpdate test-mixin :next-props :next-state)))
-  (is (= [:did-update :prev-props :prev-state]
-         (.componentDidUpdate test-mixin :prev-props :prev-state)))
-  (is (= [:will-receive-props :next-props]
-         (.componentWillReceiveProps test-mixin :next-props))))
-
-(defmixin test-mixin2
-  (will-mount [] (this-as this
-                   (om/set-state! this :mixin-mounted? true))))
-
-(defcomponent component-with-mixin [data owner]
-  (:mixins [test-mixin2])
-  (render-state [_ {:keys [mixin-mounted?]}]
-    (dom/div nil (if mixin-mounted?
-                   "mixin-mounted"))))
-
-(defcomponent wrapper-component-with-mixin [data owner]
-  (render [_]
-    (->component-with-mixin {})))
-
-(deftest defcomponent-defmixin-test
-  (is (fn? component-with-mixin$ctor))
-  (with-element [e "div"]
-    (om/root component-with-mixin {}
-             {:target e
-              :ctor component-with-mixin$ctor})
-    (is (= "mixin-mounted" (.-innerText e))))
-  (with-element [e "div"]
-    (om/root wrapper-component-with-mixin {}
-             {:target e})
-    (is (= "mixin-mounted" (.-innerText e)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

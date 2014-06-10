@@ -7,6 +7,7 @@
    [om.core :as om]
    [plumbing.fnk.schema]
    [plumbing.core :as p #+cljs :include-macros #+cljs true]
+   #+clj [om-tools.util :as util]
    #+clj [schema.macros :as sm]
    #+clj cljs.core)
   #+clj
@@ -15,21 +16,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Private
-
-#+clj
-(defn- maybe-split-first [pred s]
-  (if (pred (first s))
-    [(first s) (next s)]
-    [nil s]))
-
-#+clj
-(defn possibly-destructured?
-  "Returns true if top-level key k is destructured or potentially
-  acessible from alias in a fnk-style destructure, otherwise false"
-  [k args]
-  (boolean
-   (or (some #{(symbol (name k)) :as} args)
-       (some #(and (vector? %) (= k (first %))) args))))
 
 #+clj
 (def ^:private component-protocols
@@ -44,18 +30,6 @@
    'will-receive-props `om/IWillReceiveProps
    'render             `om/IRender
    'render-state       `om/IRenderState})
-
-#+clj
-(def ^:private mixin-methods
-  {'display-name       :getDisplayName
-   'init-state         :getInitialState
-   'should-update      :shouldComponentUpdate
-   'will-mount         :componentWillMount
-   'did-mount          :componentDidMount
-   'will-unmount       :componentWillUnmount
-   'will-update        :componentWillUpdate
-   'did-update         :componentDidUpdate
-   'will-receive-props :componentWillReceiveProps})
 
 #+clj
 (defn add-component-protocols [forms]
@@ -78,7 +52,6 @@
                     ~(if ctor-sym
                        `(merge {:ctor ~ctor-sym} ~map-sym)
                        map-sym))))))
-
 #+clj
 (defn mixin-constructor [f mixins]
   (when mixins
@@ -181,10 +154,10 @@
     - Unlike clojure.core/defn, multi-arity is not supported (must use 2 xor 3 arguments)"
   {:arglists '([name doc-string? attr-map? [data owner opts?] prepost-map? (lifecycle-method [this args*] body)+])}
   [name & args]
-  (let [[doc-string? args] (maybe-split-first string? args)
-        [attr-map? args] (maybe-split-first map? args)
+  (let [[doc-string? args] (util/maybe-split-first string? args)
+        [attr-map? args] (util/maybe-split-first map? args)
         [arglist & args] args
-        [prepost-map? body] (maybe-split-first map? args)
+        [prepost-map? body] (util/maybe-split-first map? args)
         [config body] (separate-component-config body)
         [ctor-sym ctor-fn] (mixin-constructor name (:mixins config))]
     `(do
@@ -222,10 +195,10 @@
       (render [_] ...))"
   {:arglists '([name doc-string? attr-map? [bindings*] prepost-map? (lifecycle-method [this args*] body)+])}
   [name & args]
-  (let [[doc-string? args] (maybe-split-first string? args)
-        [attr-map? args] (maybe-split-first map? args)
+  (let [[doc-string? args] (util/maybe-split-first string? args)
+        [attr-map? args] (util/maybe-split-first map? args)
         [arglist & args] args
-        [prepost-map? body] (maybe-split-first map? args)
+        [prepost-map? body] (util/maybe-split-first map? args)
         [config body] (separate-component-config body)
         [ctor-sym ctor-fn] (mixin-constructor name (:mixins config))
         owner-sym (gensym "owner")]
@@ -242,43 +215,11 @@
           {:data data#
            :owner ~owner-sym
            :opts opts#
-           ~@(when (possibly-destructured? :shared arglist)
+           ~@(when (util/possibly-destructured? :shared arglist)
                [:shared `(om/get-shared ~owner-sym)])
-           ~@(when (possibly-destructured? :state arglist)
+           ~@(when (util/possibly-destructured? :state arglist)
                [:state `(state-proxy ~owner-sym)])}))
        ~(convenience-constructor name ctor-sym))))
-
-(defmacro defmixin
-  "Defines a React mixin object.
-
-   The following lifecycle methods are supported:
-    - display-name
-    - init-state
-    - should-update
-    - will-mount
-    - did-mount
-    - will-unmount
-    - did-update
-    - will-receive-props
-
-   Example:
-    (defmixin my-mixin
-      (will-mount [] ...)
-      (will-unmount [] ...))"
-  {:arglists '([name doc-string? (lifecycle-method [this args*] body)+])
-   :added "0.2.0"}
-  [name & args]
-  (let [[doc-string? body] (maybe-split-first string? args)]
-    (assert (every? seq? body) "Invalid mixin form")
-    (assert (every? #(and (>= (count %) 2) (vector? (second %))) body) "Invalid mixin method form")
-    (let [kvs  (map (fn [[method & method-body]]
-                      (assert (contains? mixin-methods method) "Invalid mixin method")
-                      [(get mixin-methods method)
-                       (cons 'cljs.core/fn method-body)])
-                    body)]
-      `(def ~name
-         ~@(when doc-string? [doc-string?])
-         ~(JSValue. (into {} kvs))))))
 
 #+cljs
 (defn set-state?!
