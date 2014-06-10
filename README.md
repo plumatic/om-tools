@@ -248,8 +248,8 @@ om-tools provides a `defmixin` macro in the `om-tools.mixin` namespace
 to define mixins. The syntax of `defmixin` follows same pattern as the
 component macros.
 
-One last thing: the convenience builders created by
-`defcomponent`/`defcomponentk` (ie `(->tick-tock data)`)
+One last thing: the factory functions created by
+`defcomponent`/`defcomponentk` (ie `(->component-name data)`)
 encapsulate any custom constructor automatically. So a parent
 component no longer needs to be aware when a child uses mixins!
 
