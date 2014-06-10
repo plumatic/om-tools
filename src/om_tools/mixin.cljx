@@ -82,6 +82,11 @@
     - did-update
     - will-receive-props
 
+   All other methods defined will be mixed into the owner component.
+   Mixin methods are accessible from the base component via (.) accessor on owner.
+
+   All methods receive owner React component as first argument.
+
    Example:
 
     (defmixin my-mixin

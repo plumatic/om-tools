@@ -53,14 +53,17 @@
 
 (deftest separate-component-config-test
   (are [forms out] (= out (om-tools/separate-component-config forms))
-       '((:mixins [a b c]))
-       [{:mixins '[a b c]} '()]
+       '((:mixins a b c))
+       [{:mixins '(a b c)} '()]
 
        '((render [_] ...) (will-mount [_] ...))
        [{} '((render [_] ...) (will-mount [_] ...))]
 
        '((render [_] ...) (:mixins [a]))
-       [{:mixins '[a]} '((render [_] ...))]
+       [{:mixins '([a])} '((render [_] ...))]
 
        '((:opt1 true) (:opt2 false))
-       [{:opt1 true :opt2 false} '()]))
+       [{:opt1 '(true) :opt2 '(false)} '()]
+
+       '((:flag) (did-mount [_] ...))
+       [{:flag '()} '((did-mount [_] ...))]))

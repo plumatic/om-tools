@@ -54,7 +54,7 @@
                        map-sym))))))
 #+clj
 (defn mixin-constructor [f mixins]
-  (when mixins
+  (when (seq mixins)
     (let [ctor-sym (symbol (str (name f) "$ctor"))]
       [ctor-sym
        `(def ~ctor-sym
@@ -64,8 +64,8 @@
 
 #+clj
 (defn separate-component-config [forms]
-  (let [opt? #(and (seq? %) (= (count %) 2) (keyword? (first %)))]
-    [(->> (filter opt? forms) (map vec) (into {}))
+  (let [opt? #(and (seq? %) (keyword? (first %)))]
+    [(->> (filter opt? forms) (map (juxt first rest)) (into {}))
      (remove opt? forms)]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -146,13 +146,17 @@
     - render
     - render-state
 
-   In addition, a factory function will be defined: ->component-name,
-   to wrap a call to om.core/build, providing any defaults.
+   Options:
+    :mixins  One or more React mixin objects. A constructor specifying these mixins is
+             automatically generated and defined as component-name$ctor.
+
+   In addition, a factory function will be defined: ->component-name,to wrap a call to
+   om.core/build. If :mixins option is used, the generated constructor is used by default.
 
    Gotchas and limitations:
     - A render or render-state method (not both) must be defined.
     - Unlike clojure.core/defn, multi-arity is not supported (must use 2 xor 3 arguments)"
-  {:arglists '([name doc-string? attr-map? [data owner opts?] prepost-map? (lifecycle-method [this args*] body)+])}
+  {:arglists '([name doc-string? attr-map? [data owner opts?] prepost-map? (option-keyword option-values*)* (lifecycle-method [this args*] body)+])}
   [name & args]
   (let [[doc-string? args] (util/maybe-split-first string? args)
         [attr-map? args] (util/maybe-split-first map? args)
@@ -175,7 +179,8 @@
    instance. Follows the same pattern as plumbing.core/defnk, except that
    the body is a set of Om lifecycle-method implementations.
 
-   See defcomponent doc-string for supported lifecycle-methods.
+   Refer to defcomponent doc-string for supported lifecycle-methods and
+   component options.
 
    The arguments receive a map with the following keys:
     :data   The data (cursor) passed to component when built
@@ -193,7 +198,7 @@
     (defcomponent list-of-gadgets [[:data gadgets] state]
       (did-mount [_] ...)
       (render [_] ...))"
-  {:arglists '([name doc-string? attr-map? [bindings*] prepost-map? (lifecycle-method [this args*] body)+])}
+  {:arglists '([name doc-string? attr-map? [bindings*] prepost-map? (option-keyword option-values*)* (lifecycle-method [this args*] body)+])}
   [name & args]
   (let [[doc-string? args] (util/maybe-split-first string? args)
         [attr-map? args] (util/maybe-split-first map? args)

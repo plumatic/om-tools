@@ -51,7 +51,7 @@
     (swap! test-mixin-events conj [:will-receive-props @next-props])))
 
 (defcomponent component-with-mixin [data owner]
-  (:mixins [test-mixin])
+  (:mixins test-mixin)
   (render-state [_ {:keys [mixin-mounted?]}]
     (dom/div nil (if mixin-mounted?
                    "mixin-mounted"))))
@@ -94,7 +94,7 @@
     (.. owner -intervals (push (js/setInterval f t)))))
 
 (defcomponent tick-tock [data owner]
-  (:mixins [set-interval-mixin])
+  (:mixins set-interval-mixin)
   (did-mount [_]
     (.set-interval owner #(om/transact! data :seconds (fn [s] (+ 0.01 s))) 10))
   (render-state [_ {:keys [seconds] :as m}]
