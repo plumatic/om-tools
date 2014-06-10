@@ -41,13 +41,13 @@
 (def test-mixin-events (atom nil))
 
 (defmixin test-mixin
-  (will-mount [this]
-    (om/set-state! this :mixin-mounted? true))
-  (will-update [this next-props next-state]
+  (will-mount [owner]
+    (om/set-state! owner :mixin-mounted? true))
+  (will-update [owner next-props next-state]
     (swap! test-mixin-events conj [:will-update @next-props next-state]))
-  (did-update [this prev-props prev-state]
+  (did-update [owner prev-props prev-state]
     (swap! test-mixin-events conj [:did-update @prev-props prev-state]))
-  (will-receive-props [this next-props]
+  (will-receive-props [owner next-props]
     (swap! test-mixin-events conj [:will-receive-props @next-props])))
 
 (defcomponent component-with-mixin [data owner]
@@ -82,3 +82,42 @@
             [:will-update {:version 1} {:mixin-mounted? true}]
             [:did-update  {:version 1} {:mixin-mounted? true}]]
            @test-mixin-events))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmixin set-interval-mixin
+  (will-mount [owner]
+    (set! (. owner -intervals) #js []))
+  (will-unmount [owner]
+    (.. owner -intervals (map js/clearInterval)))
+  (set-interval [owner f t]
+    (.. owner -intervals (push (js/setInterval f t)))))
+
+(defcomponent tick-tock [data owner]
+  (:mixins [set-interval-mixin])
+  (did-mount [_]
+    (.set-interval owner #(om/transact! data :seconds (fn [s] (+ 0.01 s))) 10))
+  (render-state [_ {:keys [seconds] :as m}]
+    (dom/p {} "")))
+
+(deftest ^:async tick-tock-test
+  (let [e (.createElement js/document "div")
+        data (atom {:seconds 0.0})]
+    (.. js/document -body (appendChild e))
+    (om/root tick-tock
+             data
+             {:target e
+              :ctor tick-tock$ctor})
+    (testing "interval cleared when unmounted"
+      (js/setTimeout
+       (fn []
+         (. js/React (unmountComponentAtNode e))
+         (let [seconds (:seconds @data)]
+           (is (pos? seconds))
+           (js/setTimeout
+            (fn []
+              (is (= (:seconds @data) seconds))
+              (done)
+              (.. js/document -body (removeChild e)))
+            12)))
+       100))))

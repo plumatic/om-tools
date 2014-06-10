@@ -95,8 +95,8 @@
     (assert (every? seq? body) "Invalid mixin form")
     (assert (every? #(and (>= (count %) 2) (vector? (second %))) body) "Invalid mixin method form")
     (let [kvs  (map (fn [[method & method-body]]
-                      (assert (contains? mixin-methods method) (str "Invalid mixin method: " method))
-                      [(get mixin-methods method)
+                      [(or (get mixin-methods method)
+                           (munge (str method)))
                        (mixin-method-body method method-body)])
                     body)]
       `(def ~name
