@@ -279,12 +279,9 @@ Here's how you could reimplement [React's mixin example][react-mixin]:
   (render [_]
     (dom/p
       (str "React has been running for " (:seconds @state) " seconds."))))
-
-(. js/React
-   (renderComponent
-     (->tick-tock {})
-     (. js/document (getElementById "example"))))
 ```
+
+See [example](examples/mixin) for full version.
 
 ## Community
 
