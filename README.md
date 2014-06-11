@@ -11,8 +11,8 @@ Leiningen dependency (Clojars): `[prismatic/om-tools "0.2.0"]`
 
 ## Introduction
 
-om-tools aims to provide higher-order abstractions on Om's API and
-utilities frequently useful when building components.
+om-tools aims to provide higher-order abstractions and utilities frequently
+useful when building components with Om's API.
 
 ## The `om-tools.dom` Namespace
 
