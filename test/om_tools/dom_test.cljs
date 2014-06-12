@@ -58,7 +58,7 @@
   (testing "duplicate classes"
     (is (= "foo" (dom/class-set {:foo true "foo" true})))))
 
-(deftest element
+(deftest element-test
   (testing "simple element"
     (is=el (dom/element js/React.DOM.a {:href "/"} ["foo" "bar"])
            (om-dom/a #js {:href "/"} "foo" "bar")))
@@ -75,7 +75,7 @@
     (is=el (dom/element js/React.DOM.label {:for "bar"} "foo")
            (om-dom/label #js {:htmlFor "bar"} "foo"))))
 
-(deftest om-equiv
+(deftest om-equiv-test
   (testing "simple tag"
     (is=el (dom/a "test") (om-dom/a nil "test")))
 
@@ -83,13 +83,23 @@
     (is=el (dom/a {:href "/test"} "test")
            (om-dom/a #js {:href "/test"} "test")))
 
-  (testing "style map"
+  (testing "map opt value"
     (is=el (dom/div {:style {:color "blue"}})
-           (om-dom/div #js {:style #js {:color "blue"}})))
+           (om-dom/div #js {:style #js {:color "blue"}}))
+    (is=el (dom/div {:dangerouslySetInnerHTML {:__html "<p>foo</p>"}})
+           (om-dom/div #js {:dangerouslySetInnerHTML #js {:__html "<p>foo</p>"}})))
 
-  (testing "runtime template"
+  (testing "runtime opts"
     (is=el (dom/a (when true {:href "/test"}) "test")
            (om-dom/a (when true #js {:href "/test"}) "test")))
+
+  (testing "runtime children"
+    (is=el (dom/a (when true "foo") "bar")
+           (om-dom/a nil (when true "foo") "bar"))
+    (is=el (dom/a (when true "foo"))
+           (om-dom/a nil (when true "foo")))
+    (is=el (dom/a (when true "foo") ["bar" "baz"])
+           (apply om-dom/a nil (when true "foo") ["bar" "baz"])))
 
   (testing "runtime flatten"
     (is=el (dom/a (when true {:href "/test"}) ["foo" ["bar"]])
@@ -131,4 +141,12 @@
           om-c (children om-el)]
       (is (= (.-tagName el) (.-tagName om-el)))
       (doseq [i xs]
-        (is=el (nth c i) (nth om-c i))))))
+        (is=el (nth c i) (nth om-c i)))))
+
+  (testing "js values still work"
+    (is=el (dom/div #js {} (dom/span #js {}))
+           (om-dom/div #js {} (om-dom/span #js {})))
+    (is=el (dom/div #js {:className "foo"} "bar")
+           (om-dom/div #js {:className "foo"} "bar"))
+    (is=el (dom/div #js {:className "foo" :class {:display "block"}})
+           (om-dom/div #js {:className "foo" :class {:display "block"}}))))
