@@ -1,5 +1,6 @@
 (ns om-tools.schema-test
   (:require-macros
+   [om-tools.test-utils :refer [with-element]]
    [schema.macros :as sm])
   (:require
    [om-tools.schema :as schema]
@@ -41,33 +42,15 @@
                 :scores item-scores
                 :order :asc}))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Test utils
-
-(def ^:dynamic *container* nil)
-
-(defn container-fixture [test]
-  (let [parent (.-body js/document)
-        e (.createElement js/document "div")]
-    (.appendChild parent e)
-    (set! *container* e)
-    (test)
-    (.removeChild parent e)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Tests
-
 (deftest app-schema-test
-  (om/root
-   app
-   {:items [{:id 1 :name "Common Lisp"}
-            {:id 2 :name "Clojure"}
-            {:id 3 :name "ClojureScript"}]
-    :item-scores {1 1.0, 2 1.0, 3 1.0}}
-   {:target *container*})
-  (is (not (clojure.string/blank? (.-innerHTML *container*)))))
+  (with-element [e "div"]
+    (om/root
+     app
+     {:items [{:id 1 :name "Common Lisp"}
+              {:id 2 :name "Clojure"}
+              {:id 3 :name "ClojureScript"}]
+      :item-scores {1 1.0, 2 1.0, 3 1.0}}
+     {:target e})
+    (is (not (clojure.string/blank? (.-innerHTML e))))))
 
-(use-fixtures :once
-  (t/compose-fixtures
-   schema-test/validate-schemas
-   container-fixture))
+(use-fixtures :once schema-test/validate-schemas)

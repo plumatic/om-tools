@@ -7,69 +7,134 @@
    [om.core :as om]
    [plumbing.fnk.schema]
    [plumbing.core :as p #+cljs :include-macros #+cljs true]
-   #+clj [schema.macros :as sm]))
+   #+clj [om-tools.util :as util]
+   #+clj [schema.macros :as sm]
+   #+clj cljs.core)
+  #+clj
+  (:import
+   [cljs.tagged_literals JSValue]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Private
 
 #+clj
-(defn- maybe-split-first [pred s]
-  (if (pred (first s))
-    [(first s) (next s)]
-    [nil s]))
+(def ^:private component-protocols
+  {'display-name       `om/IDisplayName
+   'init-state         `om/IInitState
+   'should-update      `om/IShouldUpdate
+   'will-mount         `om/IWillMount
+   'did-mount          `om/IDidMount
+   'will-unmount       `om/IWillUnmount
+   'will-update        `om/IWillUpdate
+   'did-update         `om/IDidUpdate
+   'will-receive-props `om/IWillReceiveProps
+   'render             `om/IRender
+   'render-state       `om/IRenderState})
 
 #+clj
-(defn possibly-destructured?
-  "Returns true if top-level key k is destructured or potentially
-  acessible from alias in a fnk-style destructure, otherwise false"
-  [k args]
-  (boolean
-   (or (some #{(symbol (name k)) :as} args)
-       (some #(and (vector? %) (= k (first %))) args))))
+(defn add-component-protocols
+  "Returns forms after adding appropriate Om protocols before any
+  recognized lifecycle method names."
+  [forms]
+  (mapcat
+   (fn [form]
+     (if-let [protocol (when (seq? form) (component-protocols (first form)))]
+       [protocol form]
+       [form]))
+   forms))
 
 #+clj
-(defn add-component-protocols [forms]
-  (let [protocols {'display-name `om/IDisplayName
-                   'init-state `om/IInitState
-                   'should-update `om/IShouldUpdate
-                   'will-mount `om/IWillMount
-                   'did-mount `om/IDidMount
-                   'will-unmount `om/IWillUnmount
-                   'will-update `om/IWillUpdate
-                   'did-update `om/IDidUpdate
-                   'will-receive-props `om/IWillReceiveProps
-                   'render `om/IRender
-                   'render-state `om/IRenderState}]
-    (mapcat (fn [form]
-              (if-let [protocol (when (seq? form) (protocols (first form)))]
-                [protocol form]
-                [form]))
-            forms)))
+(defn convenience-constructor
+  "Returns quoted form that defs a function which calls om.core/build
+  on Om component constructor, f. Function will be named the same as
+  component constructor, but prefixed with \"->\" (like defrecord
+  factory function). If ctor-sym is a symbol, it is merged into build
+  options map as :ctor"
+  [f ctor-sym]
+  (let [map-sym (gensym "m")]
+    `(defn ~(symbol (str "->" (name f)))
+       ([cursor#]
+          (om/build ~f cursor#
+                    ~@(when (symbol? ctor-sym)
+                        [{:ctor ctor-sym}])))
+       ([cursor# ~map-sym]
+          (om/build ~f cursor#
+                    ~(if (symbol? ctor-sym)
+                       `(merge {:ctor ~ctor-sym} ~map-sym)
+                       map-sym))))))
+#+clj
+(defn mixin-constructor
+  "Returns quoted form that defs a custom React constructor with
+  mixins for Om component constructor, f. Constructor will be named
+  same as component constructor, but suffixed with \"$ctor\""
+  [f mixins]
+  (when (seq mixins)
+    (let [ctor-sym (symbol (str (name f) "$ctor"))]
+      [ctor-sym
+       `(def ~ctor-sym
+          (let [obj# (om/specify-state-methods! (cljs.core/clj->js om/pure-methods))]
+            (aset obj# "mixins" ~(JSValue. (vec mixins)))
+            (. js/React (~'createClass obj#))))])))
 
 #+clj
-(defn convenience-constructor [f]
-  `(defn ~(symbol (str "->" (name f)))
-     ([cursor#]
-        (om.core/build ~f cursor#))
-     ([cursor# m#]
-        (om.core/build ~f cursor# m#))))
+(defn component-option?
+  "Returns true if quoted form matches pattern of component option
+  within defcomponent(k) body, otherwise false. Options are seqs that
+  start with keywords."
+  [form]
+  (and (seq? form) (keyword? (first form))))
+
+#+clj
+(defn separate-component-config
+  "Returns tuple of [options-map other-forms] from forms within
+  defcomponent(k) macro body. Options-map is a map of option keyword
+  to sequence of values; other-forms is sequence of all other
+  non-option forms."
+  [forms]
+  (let [[option-forms other-forms] ((juxt filter remove) component-option? forms)]
+    [(into {} (map (juxt first rest) option-forms))
+     other-forms]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; defcomponent/k validation
+
+#+clj
+(defn valid-component-form? [form]
+  (or (and (seq? form)
+           (symbol? (first form))
+           (vector? (second form))
+           (<= 1 (count (second form))))
+      (symbol? form)))
+
+#+clj
+(defn assert-valid-component
+  "Throws IllegalArgumentException if component body is malformed."
+  [body]
+  (when-let [invalid-form (first (remove valid-component-form? body))]
+    (throw (IllegalArgumentException.
+            "Unexpected form in body of component: " invalid-form))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public
 
 #+cljs
 (defn state-proxy
-  "Returns an atom-like object for reading and writing Om component state"
+  "Returns an atom-like object for reading and writing Om component
+   state.
+
+   Note: Behavior may exactly not match atoms when deref'ing
+   immediately following a reset!/swap! because Om processes state
+   changes asynchronously in separate render phases."
   [owner]
   (when owner
-    (let [get-state #(om.core/get-state owner)]
+    (let [get-state #(om/get-state owner)]
       (reify
         IDeref
         (-deref [_]
           (get-state))
         IReset
         (-reset! [_ v]
-          (om.core/set-state! owner v))
+          (om/set-state! owner v))
         ISwap
         (-swap! [s f]
           (-reset! s (f (get-state))))
@@ -107,6 +172,7 @@
    Everything inside body is within an implicit reify; any other non-Om protocols
    can be specified if needed."
   [& body]
+  (assert-valid-component body)
   `(reify ~@(add-component-protocols body)))
 
 (defmacro defcomponent
@@ -132,33 +198,41 @@
     - render
     - render-state
 
-   In addition, a factory function will be defined: ->component-name,
-   to wrap a call to om.core/build, providing any defaults.
+   Options:
+    :mixins  One or more React mixin objects. A constructor specifying these mixins is
+             automatically generated and defined as component-name$ctor.
+
+   In addition, a factory function will be defined: ->component-name,to wrap a call to
+   om.core/build. If :mixins option is used, the generated constructor is used by default.
 
    Gotchas and limitations:
     - A render or render-state method (not both) must be defined.
     - Unlike clojure.core/defn, multi-arity is not supported (must use 2 xor 3 arguments)"
-  {:arglists '([name doc-string? attr-map? [data owner opts?] prepost-map? (lifecycle-method [this args*] body)+])}
+  {:arglists '([name doc-string? attr-map? [data owner opts?] prepost-map? (option-keyword option-values*)* (lifecycle-method [this args*] body)+])}
   [name & args]
-  (let [[doc-string? args] (maybe-split-first string? args)
-        [attr-map? args] (maybe-split-first map? args)
+  (let [[doc-string? args] (util/maybe-split-first string? args)
+        [attr-map? args] (util/maybe-split-first map? args)
         [arglist & args] args
-        [prepost-map? body] (maybe-split-first map? args)]
+        [prepost-map? body] (util/maybe-split-first map? args)
+        [config body] (separate-component-config body)
+        [ctor-sym ctor-fn] (mixin-constructor name (:mixins config))]
     `(do
+       ~ctor-fn
        (sm/defn ~name
          ~@(when doc-string? [doc-string?])
          ~@(when attr-map? [attr-map?])
          ~arglist
          ~@(when prepost-map? [prepost-map?])
          (component ~@body))
-       ~(convenience-constructor name))))
+       ~(convenience-constructor name ctor-sym))))
 
 (defmacro defcomponentk
   "Defines a function that returns an om.core/IRender or om.core/IRenderState
    instance. Follows the same pattern as plumbing.core/defnk, except that
    the body is a set of Om lifecycle-method implementations.
 
-   See defcomponent doc-string for supported lifecycle-methods.
+   Refer to defcomponent doc-string for supported lifecycle-methods and
+   component options.
 
    The arguments receive a map with the following keys:
     :data   The data (cursor) passed to component when built
@@ -176,14 +250,17 @@
     (defcomponent list-of-gadgets [[:data gadgets] state]
       (did-mount [_] ...)
       (render [_] ...))"
-  {:arglists '([name doc-string? attr-map? [bindings*] prepost-map? (lifecycle-method [this args*] body)+])}
+  {:arglists '([name doc-string? attr-map? [bindings*] prepost-map? (option-keyword option-values*)* (lifecycle-method [this args*] body)+])}
   [name & args]
-  (let [[doc-string? args] (maybe-split-first string? args)
-        [attr-map? args] (maybe-split-first map? args)
+  (let [[doc-string? args] (util/maybe-split-first string? args)
+        [attr-map? args] (util/maybe-split-first map? args)
         [arglist & args] args
-        [prepost-map? body] (maybe-split-first map? args)
+        [prepost-map? body] (util/maybe-split-first map? args)
+        [config body] (separate-component-config body)
+        [ctor-sym ctor-fn] (mixin-constructor name (:mixins config))
         owner-sym (gensym "owner")]
     `(do
+       ~ctor-fn
        (defn ~name
          ~@(when doc-string? [doc-string?])
          ~@(when attr-map? [attr-map?])
@@ -195,11 +272,11 @@
           {:data data#
            :owner ~owner-sym
            :opts opts#
-           ~@(when (possibly-destructured? :shared arglist)
+           ~@(when (util/possibly-destructured? :shared arglist)
                [:shared `(om/get-shared ~owner-sym)])
-           ~@(when (possibly-destructured? :state arglist)
+           ~@(when (util/possibly-destructured? :state arglist)
                [:state `(state-proxy ~owner-sym)])}))
-       ~(convenience-constructor name))))
+       ~(convenience-constructor name ctor-sym))))
 
 #+cljs
 (defn set-state?!

@@ -51,16 +51,19 @@
             (init-state [this] {:count 0})
             (render [this] (om.dom/h1 nil (:text data))))))))
 
-(deftest possibly-destructured?-test
-  (are [form] (om-tools/possibly-destructured? :foo form)
-       '[foo]
-       '[foo bar]
-       '[bar foo]
-       '[[:foo bar]]
-       '[[:foo [:bar baz]]]
-       '[bar :as m])
-  (are [form] (not (om-tools/possibly-destructured? :foo form))
-       '[]
-       '[bar]
-       '[[:bar foo]]
-       '[[:bar :as foo]]))
+(deftest separate-component-config-test
+  (are [forms out] (= out (om-tools/separate-component-config forms))
+       '((:mixins a b c))
+       [{:mixins '(a b c)} '()]
+
+       '((render [_] ...) (will-mount [_] ...))
+       [{} '((render [_] ...) (will-mount [_] ...))]
+
+       '((render [_] ...) (:mixins [a]))
+       [{:mixins '([a])} '((render [_] ...))]
+
+       '((:opt1 true) (:opt2 false))
+       [{:opt1 '(true) :opt2 '(false)} '()]
+
+       '((:flag) (did-mount [_] ...))
+       [{:flag '()} '((did-mount [_] ...))]))

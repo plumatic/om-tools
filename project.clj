@@ -23,7 +23,11 @@
                       :source-paths ["src" "target/generated/src" "examples/sliders/src"]
                       :compiler {:output-to "examples/sliders/main.js"
                                  :output-dir "examples/sliders/out"
-                                 :source-map true
+                                 :optimizations :none}}
+                     {:id "example/mixin"
+                      :source-paths ["src" "target/generated/src" "examples/mixin/src"]
+                      :compiler {:output-to "examples/mixin/main.js"
+                                 :output-dir "examples/mixin/out"
                                  :optimizations :none}}]}}}
 
   :lein-release {:deploy-via :shell
