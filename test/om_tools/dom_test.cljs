@@ -83,9 +83,11 @@
     (is=el (dom/a {:href "/test"} "test")
            (om-dom/a #js {:href "/test"} "test")))
 
-  (testing "style map"
+  (testing "map opt value"
     (is=el (dom/div {:style {:color "blue"}})
-           (om-dom/div #js {:style #js {:color "blue"}})))
+           (om-dom/div #js {:style #js {:color "blue"}}))
+    (is=el (dom/div {:dangerouslySetInnerHTML {:__html "<p>foo</p>"}})
+           (om-dom/div #js {:dangerouslySetInnerHTML #js {:__html "<p>foo</p>"}})))
 
   (testing "runtime template"
     (is=el (dom/a (when true {:href "/test"}) "test")
@@ -131,4 +133,8 @@
           om-c (children om-el)]
       (is (= (.-tagName el) (.-tagName om-el)))
       (doseq [i xs]
-        (is=el (nth c i) (nth om-c i))))))
+        (is=el (nth c i) (nth om-c i)))))
+
+  (testing "js values still work"
+    (is=el (dom/div #js {:className "foo" :class {:display "block"}})
+           (om-dom/div #js {:className "foo" :class {:display "block"}}))))

@@ -1,4 +1,5 @@
 (ns om-tools.dom
+  "DOM element constructors for React. Mirrors om.dom namespace"
   (:refer-clojure :exclude [map meta time])
   (:require
    [clojure.string :as str]
@@ -11,10 +12,6 @@
 #+clj
 (defn clj->js [v]
   (JSValue. v))
-
-(defn map-keys [f m]
-  (into {} (for [[k v] m]
-             [(f k) v])))
 
 (defn camel-case [s]
   (str/replace
@@ -34,24 +31,25 @@
       camel-case
       keyword))
 
-(defn format-opt-style [opt]
-  (let [[k v] opt]
-    (if (= k :style)
-      [k (clj->js v)]
-      opt)))
+(defn format-opt-val [opt-val]
+  (if (map? opt-val)
+    (clj->js opt-val)
+    opt-val))
 
-(defn format-opts [opts]
+(defn format-opts
+  "Returns JavaScript object for React DOM attributes from opts map"
+  [opts]
   (->> opts
-       (map-keys format-opt-key)
-       (clojure.core/map format-opt-style)
+       (clojure.core/map
+        (fn [[k v]] [(format-opt-key k) (format-opt-val v)]))
        (into {})
        clj->js))
 
-(defn literal? [form]
+(defn ^boolean literal? [form]
   (not (or (symbol? form)
            (list? form))))
 
-(defn possible-coll? [form]
+(defn ^boolean possible-coll? [form]
   (or (coll? form)
       (symbol? form)
       (list? form)))
@@ -64,13 +62,16 @@
     (symbol "om.dom" (name tag))
     (symbol "js" (str "React.DOM." (name tag)))))
 
-(defn valid-opts? [opts]
-  (or (nil? opts) (map? opts)))
+#+clj
+(defn object? [x]
+  (instance? JSValue x))
 
 (defn element-args [opts children]
-  (if (valid-opts? opts)
-    [(when opts (format-opts opts)) children]
-    [nil (cons opts children)]))
+  (cond
+   (nil? opts) [nil children]
+   (map? opts) [(format-opts opts) children]
+   (object? opts) [opts children]
+   :else [nil (cons opts children)]))
 
 #+cljs
 (defn element [ctor opts children]
