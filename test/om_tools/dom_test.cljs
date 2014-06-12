@@ -144,5 +144,9 @@
         (is=el (nth c i) (nth om-c i)))))
 
   (testing "js values still work"
+    (is=el (dom/div #js {} (dom/span #js {}))
+           (om-dom/div #js {} (om-dom/span #js {})))
+    (is=el (dom/div #js {:className "foo"} "bar")
+           (om-dom/div #js {:className "foo"} "bar"))
     (is=el (dom/div #js {:className "foo" :class {:display "block"}})
            (om-dom/div #js {:className "foo" :class {:display "block"}}))))
