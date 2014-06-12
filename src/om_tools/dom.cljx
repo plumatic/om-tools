@@ -13,12 +13,22 @@
 (defn clj->js [v]
   (JSValue. v))
 
-(defn camel-case [s]
-  (str/replace
-   s #"-(\w)"
-   #(str/upper-case (second %))))
+(defn camel-case
+  "Converts snake-case to camelCase"
+  [s]
+  (str/replace s #"-(\w)" (comp str/upper-case second)))
 
-(defn opt-key-alias [opt]
+(defn opt-key-case
+  "Converts attributes that are snake-case and should be camelCase"
+  [attr]
+  (if (or (< (count attr) 5)
+          (#{"data-" "aria-"} (subs attr 0 5)))
+    attr
+    (camel-case attr)))
+
+(defn opt-key-alias
+  "Converts aliased attributes"
+  [opt]
   (case opt
     :class :className
     :for :htmlFor
@@ -28,7 +38,7 @@
   (-> opt-key
       opt-key-alias
       name
-      camel-case
+      opt-key-case
       keyword))
 
 (defn format-opt-val [opt-val]

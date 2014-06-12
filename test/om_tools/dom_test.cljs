@@ -40,7 +40,29 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Tests
 
-(deftest class-set
+(deftest camel-case-test
+  (are [expected s] (= expected (dom/camel-case s))
+       "" ""
+       "foo" "foo"
+       "fooBar" "foo-bar"
+       "fooBarBaz" "foo-bar-baz"
+       "fooBarBaz" "fooBarBaz"))
+
+(deftest opt-key-case-test
+  (is (= "acceptCharset" (dom/opt-key-case "accept-charset")))
+  (is (= "httpEquiv" (dom/opt-key-case "http-equiv")))
+
+  (is (= "test" (dom/opt-key-case "test")))
+
+  (testing "data-* attributes not camel-cased"
+    (is (= "data-test"    (dom/opt-key-case "data-test")))
+    (is (= "data-foo-bar" (dom/opt-key-case "data-foo-bar"))))
+
+  (testing "aria-* attributes not camel-cased"
+    (is (= "aria-test"    (dom/opt-key-case "aria-test")))
+    (is (= "aria-foo-bar" (dom/opt-key-case "aria-foo-bar")))))
+
+(deftest class-set-test
   (testing "nil when no truthy values"
     (is (nil? (dom/class-set {})))
     (is (nil? (dom/class-set {"foo" false})))
