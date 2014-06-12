@@ -58,7 +58,7 @@
   (testing "duplicate classes"
     (is (= "foo" (dom/class-set {:foo true "foo" true})))))
 
-(deftest element
+(deftest element-test
   (testing "simple element"
     (is=el (dom/element js/React.DOM.a {:href "/"} ["foo" "bar"])
            (om-dom/a #js {:href "/"} "foo" "bar")))
@@ -75,7 +75,7 @@
     (is=el (dom/element js/React.DOM.label {:for "bar"} "foo")
            (om-dom/label #js {:htmlFor "bar"} "foo"))))
 
-(deftest om-equiv
+(deftest om-equiv-test
   (testing "simple tag"
     (is=el (dom/a "test") (om-dom/a nil "test")))
 
@@ -89,9 +89,17 @@
     (is=el (dom/div {:dangerouslySetInnerHTML {:__html "<p>foo</p>"}})
            (om-dom/div #js {:dangerouslySetInnerHTML #js {:__html "<p>foo</p>"}})))
 
-  (testing "runtime template"
+  (testing "runtime opts"
     (is=el (dom/a (when true {:href "/test"}) "test")
            (om-dom/a (when true #js {:href "/test"}) "test")))
+
+  (testing "runtime children"
+    (is=el (dom/a (when true "foo") "bar")
+           (om-dom/a nil (when true "foo") "bar"))
+    (is=el (dom/a (when true "foo"))
+           (om-dom/a nil (when true "foo")))
+    (is=el (dom/a (when true "foo") ["bar" "baz"])
+           (apply om-dom/a nil (when true "foo") ["bar" "baz"])))
 
   (testing "runtime flatten"
     (is=el (dom/a (when true {:href "/test"}) ["foo" ["bar"]])
