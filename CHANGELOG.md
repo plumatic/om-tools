@@ -1,3 +1,11 @@
+## 0.2.1
+
+*   Add `om-tools.mixin` namespace for defining Om mixins
+*   Add `:mixin` option to `defcomponent`/`defcomponentk` macro to generate
+    React component constructor with mixins configured.
+*   Fixes `om-tools.dom` unparsed attribute values for maps.
+*   Fixes `om-tools.dom` unwanted camelCasing of data-* and aria-* attributes.
+
 ## 0.2.0
 
 *   Rename `defcomponent` macro to `defcomponentk` to indicate it uses
