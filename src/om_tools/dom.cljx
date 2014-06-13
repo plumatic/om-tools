@@ -14,12 +14,12 @@
   (JSValue. v))
 
 (defn camel-case
-  "Converts snake-case to camelCase"
+  "Converts kebab-case to camelCase"
   [s]
   (str/replace s #"-(\w)" (comp str/upper-case second)))
 
 (defn opt-key-case
-  "Converts attributes that are snake-case and should be camelCase"
+  "Converts attributes that are kebab-case and should be camelCase"
   [attr]
   (if (or (< (count attr) 5)
           (#{"data-" "aria-"} (subs attr 0 5)))
