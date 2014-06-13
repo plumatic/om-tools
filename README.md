@@ -14,7 +14,13 @@ Leiningen dependency (Clojars): `[prismatic/om-tools "0.2.1"]`
 om-tools aims to provide higher-order abstractions and utilities frequently
 useful when building components with Om's API.
 
-## The `om-tools.dom` Namespace
+## Contents
+
+*   [DOM tools](#dom-tools)
+*   [Components tools](#component-tools)
+*   [Mixin tools](#mixin-tools)
+
+## DOM tools
 
 `om-tools.dom` mirrors the `om.dom` namespace while using macros and
 minimal runtime overhead to make the following improvements:
@@ -57,7 +63,7 @@ And with `om-tools.dom`:
                     (str "Item " i)))))
 ```
 
-## Component Macros
+## Component tools
 
 ### `defcomponent`
 
@@ -231,7 +237,7 @@ an `atom`, there is at least one minor difference: changes made by
 `swap!` and `reset!` are not immediately available if you `deref`
 in the same render phase.
 
-## Mixins
+## Mixin tools
 
 React provides [mixin functionality][react-mixin] to handle
 cross-cutting concerns and allow highly reusable component behaviors.
