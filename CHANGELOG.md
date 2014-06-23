@@ -1,3 +1,8 @@
+## 0.2.2
+
+*   Upgrade dependency: schema 0.2.4
+*   Upgrade dependency: plumbing 0.3.2
+
 ## 0.2.1
 
 *   Add `om-tools.mixin` namespace for defining Om mixins
