@@ -9,8 +9,8 @@
                  [org.clojure/clojurescript "0.0-2202"]
                  [com.keminglabs/cljx "0.3.1"]
                  [om "0.6.4"]
-                 [prismatic/plumbing "0.3.1"]
-                 [prismatic/schema "0.2.3"]]
+                 [prismatic/plumbing "0.3.2"]
+                 [prismatic/schema "0.2.4"]]
 
   :plugins [[com.keminglabs/cljx "0.3.1"]
             [lein-cljsbuild "1.0.3"]
