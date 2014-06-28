@@ -141,7 +141,7 @@ to default Clojure map destructuring.
 {:keys [foo bar]}                    :: [foo bar]
 {:keys [foo bar] :as m}              :: [foo bar :as m]
 {:keys [foo bar] :or {bar 21}}       :: [foo {bar 21}]
-{{:keys [baz qux]} :foo :keys [bar]} :: [[:foo [baz qux]] bar]
+{{:keys [baz qux]} :foo :keys [bar]} :: [[:foo baz qux] bar]
 ```
 
 However, an important distinction between Clojure's default
