@@ -96,11 +96,11 @@ Example of `defcomponent` including schema annotation:
 
 ```clojure
 (ns example
-  (:require
-    [om-tools.core :refer-macros [defcomponent]]
-    [om-tools.dom :include-macros true]))
+    (:require [om.core :as om :include-macros true]
+              [om-tools.core :refer-macros [defcomponent]]
+              [om-tools.dom :as dom :include-macros true]))
 
-(defcomponent counter [data :- {:init number} owner]
+(defcomponent counter [data owner]
   (will-mount [_]
     (om/set-state! owner :n (:init data)))
   (render-state [_ {:keys [n]}]
@@ -111,7 +111,10 @@ Example of `defcomponent` including schema annotation:
         "+")
       (dom/button
         {:on-click #(om/set-state! owner :n (dec n))}
-        "-")))))
+        "-"))))
+
+(om/root counter {:init 5}
+         {:target js/document.body})
 ```
 
 ### `defcomponentk`
