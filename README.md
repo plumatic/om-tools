@@ -111,7 +111,10 @@ Example of `defcomponent` including schema annotation:
         "+")
       (dom/button
         {:on-click #(om/set-state! owner :n (dec n))}
-        "-")))))
+        "-"))))
+
+(om/root counter {:init 5}
+         {:target (. js/document -body)})
 ```
 
 ### `defcomponentk`
