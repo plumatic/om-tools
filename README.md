@@ -100,7 +100,7 @@ Example of `defcomponent` including schema annotation:
     [om-tools.core :refer-macros [defcomponent]]
     [om-tools.dom :include-macros true]))
 
-(defcomponent counter [data :- {:init number} owner]
+(defcomponent counter [data :- {:init js/Number} owner]
   (will-mount [_]
     (om/set-state! owner :n (:init data)))
   (render-state [_ {:keys [n]}]
@@ -177,9 +177,9 @@ keys:
     [om.core :as om]))
 
 (defschema ProgressBar
-  {:value number
-   (s/optional-key :min) number
-   (s/optional-key :max) number})
+  {:value js/Number
+   (s/optional-key :min) js/Number
+   (s/optional-key :max) js/Number})
 
 (defcomponentk progress-bar
   "A simple progress bar"
