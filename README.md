@@ -267,7 +267,7 @@ Here's how you could reimplement [React's mixin example][react-mixin]:
 ```clojure
 (ns example
   (:require
-    [om-tools.core :refer-macros [defcomponentk]
+    [om-tools.core :refer-macros [defcomponentk]]
     [om-tools.dom :as dom :include-macros true]
     [om-tools.mixin :refer-macros [defmixin]]))
 
