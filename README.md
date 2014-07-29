@@ -174,10 +174,10 @@ keys:
 ```clojure
 (ns example
   (:require-macros
-    [schema.macros :refer [defschema]]
-    [om-tools.core :refer [defcomponentk]])
+    [schema.macros :refer [defschema]])
   (:require
-    [om.core :as om]))
+    [om.core :as om]
+    [om-tools.core :refer-macros [defcomponentk]]))
 
 (defschema ProgressBar
   {:value js/Number
