@@ -1,3 +1,8 @@
+## 0.2.3
+
+*   Change non-essential dependencies to be transient to avoid conflicting with
+    user supplied dependencies.
+
 ## 0.2.2
 
 *   Upgrade dependency: schema 0.2.4

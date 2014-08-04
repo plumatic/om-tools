@@ -6,17 +6,17 @@
             :distribution :repo}
 
   :dependencies [[org.clojure/clojure "1.5.1"]
-                 [om "0.6.4"]
                  [prismatic/plumbing "0.3.2"]
                  [prismatic/schema "0.2.4"]]
 
   :plugins [[com.keminglabs/cljx "0.3.1"]
             [lein-cljsbuild "1.0.3"]
             [com.cemerick/clojurescript.test "0.3.0"]]
-  :profiles {:provided
-             {:dependencies [[org.clojure/clojurescript "0.0-2202"]
-                             [com.keminglabs/cljx "0.3.1"]]}
-             :dev {:dependencies [[prismatic/dommy "0.1.2"]]
+
+  :profiles {:dev {:dependencies [[org.clojure/clojurescript "0.0-2202"]
+                                  [om "0.6.4"]
+                                  [com.keminglabs/cljx "0.3.1"]
+                                  [prismatic/dommy "0.1.2"]]
                    :cljsbuild
                    {:builds
                     [{:id "example/sliders"
