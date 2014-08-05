@@ -48,33 +48,33 @@
   "Returns quoted form that defs a function which calls om.core/build
   on Om component constructor, f. Function will be named the same as
   component constructor, but prefixed with \"->\" (like defrecord
-  factory function). If ctor-sym is a symbol, it is merged into build
-  options map as :ctor"
-  [f ctor-sym]
+  factory function). If descriptor-sym is a symbol, it is merged into build
+  options map as :descriptor"
+  [f descriptor-sym]
   (let [map-sym (gensym "m")]
     `(defn ~(symbol (str "->" (name f)))
        ([cursor#]
           (om/build ~f cursor#
-                    ~@(when (symbol? ctor-sym)
-                        [{:ctor ctor-sym}])))
+                    ~@(when (symbol? descriptor-sym)
+                        [{:descriptor descriptor-sym}])))
        ([cursor# ~map-sym]
           (om/build ~f cursor#
-                    ~(if (symbol? ctor-sym)
-                       `(merge {:ctor ~ctor-sym} ~map-sym)
+                    ~(if (symbol? descriptor-sym)
+                       `(merge {:descriptor ~descriptor-sym} ~map-sym)
                        map-sym))))))
 #+clj
-(defn mixin-constructor
-  "Returns quoted form that defs a custom React constructor with
-  mixins for Om component constructor, f. Constructor will be named
-  same as component constructor, but suffixed with \"$ctor\""
+(defn mixin-descriptor
+  "Returns quoted form that defs a descriptor with mixins for Om
+  component constructor, f. Descriptor will be named same as component
+  constructor, but suffixed with \"$descriptor\""
   [f mixins]
   (when (seq mixins)
-    (let [ctor-sym (symbol (str (name f) "$ctor"))]
-      [ctor-sym
-       `(def ~ctor-sym
-          (let [obj# (om/specify-state-methods! (cljs.core/clj->js om/pure-methods))]
-            (aset obj# "mixins" ~(JSValue. (vec mixins)))
-            (. js/React (~'createClass obj#))))])))
+    (let [descriptor-sym (symbol (str (name f) "$descriptor"))]
+      [descriptor-sym
+       `(def ~descriptor-sym
+          (let [descriptor# (om/specify-state-methods! (cljs.core/clj->js om/pure-methods))]
+            (aset descriptor# "mixins" ~(JSValue. (vec mixins)))
+            descriptor#))])))
 
 #+clj
 (defn component-option?
@@ -199,8 +199,8 @@
     - render-state
 
    Options:
-    :mixins  One or more React mixin objects. A constructor specifying these mixins is
-             automatically generated and defined as component-name$ctor.
+    :mixins  One or more React mixin objects. A descriptor specifying these mixins is
+             automatically generated and defined as component-name$descriptor.
 
    In addition, a factory function will be defined: ->component-name,to wrap a call to
    om.core/build. If :mixins option is used, the generated constructor is used by default.
@@ -215,16 +215,16 @@
         [arglist & args] args
         [prepost-map? body] (util/maybe-split-first map? args)
         [config body] (separate-component-config body)
-        [ctor-sym ctor-fn] (mixin-constructor name (:mixins config))]
+        [descriptor-sym descriptor] (mixin-descriptor name (:mixins config))]
     `(do
-       ~ctor-fn
+       ~descriptor
        (sm/defn ~name
          ~@(when doc-string? [doc-string?])
          ~@(when attr-map? [attr-map?])
          ~arglist
          ~@(when prepost-map? [prepost-map?])
          (component ~@body))
-       ~(convenience-constructor name ctor-sym))))
+       ~(convenience-constructor name descriptor-sym))))
 
 (defmacro defcomponentk
   "Defines a function that returns an om.core/IRender or om.core/IRenderState
@@ -257,10 +257,10 @@
         [arglist & args] args
         [prepost-map? body] (util/maybe-split-first map? args)
         [config body] (separate-component-config body)
-        [ctor-sym ctor-fn] (mixin-constructor name (:mixins config))
+        [descriptor-sym descriptor] (mixin-descriptor name (:mixins config))
         owner-sym (gensym "owner")]
     `(do
-       ~ctor-fn
+       ~descriptor
        (defn ~name
          ~@(when doc-string? [doc-string?])
          ~@(when attr-map? [attr-map?])
@@ -276,7 +276,7 @@
                [:shared `(om/get-shared ~owner-sym)])
            ~@(when (util/possibly-destructured? :state arglist)
                [:state `(state-proxy ~owner-sym)])}))
-       ~(convenience-constructor name ctor-sym))))
+       ~(convenience-constructor name descriptor-sym))))
 
 #+cljs
 (defn set-state?!

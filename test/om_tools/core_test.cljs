@@ -12,14 +12,6 @@
    [schema.core :as s]
    [schema.test :as schema-test]))
 
-(defn composite-component?
-  "http://git.io/BPd6uw"
-  [x]
-  (and (fn? (aget x "render"))
-       (fn? (aget x "setState"))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (sm/defschema TestComponent
   {:foo s/Str :bar s/Str})
 
@@ -58,7 +50,7 @@
     (is (thrown? js/Error (test-component {:foo :bar :bar "bar"} nil)))
     (is (thrown? js/Error (test-component {:foo {} :bar "bar"} nil))))
   (testing "build constructor"
-    (is (composite-component? (->test-component {:foo "foo" :bar "bar"})))))
+    (is (. js/React (isValidComponent (->test-component {:foo "foo" :bar "bar"}))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -97,7 +89,7 @@
     (is (thrown? js/Error (test-componentk {:foo :bar :bar "bar"} nil)))
     (is (thrown? js/Error (test-componentk {:foo {} :bar "bar"} nil))))
   (testing "build constructor"
-    (is (composite-component? (->test-componentk {:foo "foo" :bar "bar"})))))
+    (is (. js/React (isValidComponent (->test-componentk {:foo "foo" :bar "bar"}))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -208,10 +200,10 @@
                 (-get-state [this ks]
                   (get-in @mem ks))
                 om/ISetState
-                (-set-state! [this val]
+                (-set-state! [this val render]
                   (swap! calls update-in [::root] (fnil inc 0))
                   (reset! mem val))
-                (-set-state! [this ks val]
+                (-set-state! [this ks val render]
                   (swap! calls update-in ks (fnil inc 0))
                   (swap! mem assoc-in ks val)))]
     (is (not (nil? (om-tools/set-state?! owner {:bar "bar"}))))

@@ -61,11 +61,11 @@
     (->component-with-mixin data)))
 
 (deftest defcomponent-defmixin-test
-  (is (fn? component-with-mixin$ctor))
+  (is (object? component-with-mixin$descriptor))
   (with-element [e "div"]
     (om/root component-with-mixin {}
              {:target e
-              :ctor component-with-mixin$ctor})
+              :descriptor component-with-mixin$descriptor})
     (is (= "mixin-mounted" (.-innerText e))))
   (with-element [e "div"]
     (reset! test-mixin-events [])
@@ -107,7 +107,7 @@
     (om/root tick-tock
              data
              {:target e
-              :ctor tick-tock$ctor})
+              :descriptor tick-tock$descriptor})
     (testing "interval cleared when unmounted"
       (js/setTimeout
        (fn []

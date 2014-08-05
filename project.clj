@@ -1,4 +1,4 @@
-(defproject prismatic/om-tools "0.2.4-SNAPSHOT"
+(defproject prismatic/om-tools "0.3.0-SNAPSHOT"
   :description "Tools for building Om applications"
   :url "http://github.com/prismatic/om-tools"
   :license {:name "Eclipse Public License - v 1.0"
@@ -15,7 +15,7 @@
 
   :profiles {:provided
              {:dependencies [[org.clojure/clojurescript "0.0-2202"]
-                             [om "0.6.4"]]}
+                             [om "0.7.1"]]}
              :dev {:dependencies [[com.keminglabs/cljx "0.3.1"]
                                   [prismatic/dommy "0.1.2"]]
                    :cljsbuild
