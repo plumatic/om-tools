@@ -4,7 +4,11 @@ A ClojureScript library of general-purpose tools for building applications with
 [Om](https://github.com/swannodette/om) and
 [Facebook's React](http://facebook.github.io/react/).
 
-Leiningen dependency (Clojars): `[prismatic/om-tools "0.2.3"]`
+Leiningen dependency (Clojars):
+
+```clojure
+[prismatic/om-tools "0.2.3"]
+```
 
 **This is an alpha release. The API and organizational structure are
   subject to change. Comments and contributions are much appreciated.**
