@@ -13,9 +13,10 @@
             [lein-cljsbuild "1.0.3"]
             [com.cemerick/clojurescript.test "0.3.0"]]
 
-  :profiles {:dev {:dependencies [[org.clojure/clojurescript "0.0-2202"]
-                                  [om "0.6.4"]
-                                  [com.keminglabs/cljx "0.3.1"]
+  :profiles {:provided
+             {:dependencies [[org.clojure/clojurescript "0.0-2202"]
+                             [om "0.6.4"]]}
+             :dev {:dependencies [[com.keminglabs/cljx "0.3.1"]
                                   [prismatic/dommy "0.1.2"]]
                    :cljsbuild
                    {:builds
