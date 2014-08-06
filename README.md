@@ -7,7 +7,7 @@ A ClojureScript library of general-purpose tools for building applications with
 Leiningen dependency (Clojars):
 
 ```clojure
-[prismatic/om-tools "0.2.3"] ;; for om <= "0.6.5"
+[prismatic/om-tools "0.2.3"] ;; for om <  "0.7.0"
 [prismatic/om-tools "0.3.0"] ;; for om >= "0.7.0"
 ```
 
