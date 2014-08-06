@@ -1,3 +1,9 @@
+## 0.3.0
+
+*   Upgrade to Om 0.7.1
+*   BREAKING: components with mixins generate React descriptor with "$descriptor"
+    suffix rather than a React constructor with a "$ctor" suffix.
+
 ## 0.2.3
 
 *   Change non-essential dependencies to be transient to avoid conflicting with
