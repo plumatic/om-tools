@@ -13,6 +13,14 @@
 (defn clj->js [v]
   (JSValue. v))
 
+#+clj
+(defn literal?
+  "Returns true if form is a literal value (number, string, map, etc),
+  otherwise false."
+  [form]
+  (not (or (symbol? form)
+           (list? form))))
+
 (defn camel-case
   "Converts kebab-case to camelCase"
   [s]
@@ -55,7 +63,7 @@
    (format-opts opt-val)
 
    #+clj
-   (symbol? opt-val)
+   (not (literal? opt-val))
    #+clj
    `(format-opts ~opt-val)
 
@@ -65,15 +73,13 @@
 (defn format-opts
   "Returns JavaScript object for React DOM attributes from opts map"
   [opts]
-  (->> opts
-       (clojure.core/map
-        (fn [[k v]] [(format-opt-key k) (format-opt-val v)]))
-       (into {})
-       clj->js))
-
-(defn ^boolean literal? [form]
-  (not (or (symbol? form)
-           (list? form))))
+  (if (map? opts)
+    (->> opts
+         (clojure.core/map
+          (fn [[k v]] [(format-opt-key k) (format-opt-val v)]))
+         (into {})
+         clj->js)
+    opts))
 
 (defn ^boolean possible-coll? [form]
   (or (coll? form)
