@@ -247,10 +247,6 @@ in the same render phase.
 
 ## Mixin tools
 
-*Experimental*
-
-*Currently supports om < 0.7.0*
-
 React provides [mixin functionality][react-mixin] to handle
 cross-cutting concerns and allow highly reusable component behaviors.
 While [mixins are possible with Om][om-mixin], it does not provide

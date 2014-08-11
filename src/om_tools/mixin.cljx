@@ -12,7 +12,7 @@
 #+clj
 (def ^:private mixin-methods
   {'display-name       :getDisplayName
-   'init-state         :getInitialState
+   ;;'init-state         :getInitialState
    'will-mount         :componentWillMount
    'did-mount          :componentDidMount
    'will-unmount       :componentWillUnmount
@@ -106,13 +106,15 @@
 
    The following lifecycle methods are supported:
     - display-name
-    - init-state
     - will-mount
     - did-mount
     - will-unmount
     - will-update
     - did-update
     - will-receive-props
+
+   Note: init-state lifecycle does not currently behave as expected. (see prismatic/om-tools#29)
+   Note: advanced compilation can break for non-lifecycle methods (see prismatic/om-tools#28)
 
    All other methods defined will be mixed into the owner component.
    Mixin methods are accessible from the base component via (.) accessor on owner.
