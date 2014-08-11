@@ -165,6 +165,15 @@
       (doseq [i xs]
         (is=el (nth c i) (nth om-c i)))))
 
+  (testing "var in opts"
+    (is=el (om-dom/div #js {:style #js {:backgroundColor "red"}})
+           (let [style {:background-color "red"}]
+             (dom/div {:style style})))
+    (is=el (om-dom/div #js {:style #js {:backgroundColor "red"}})
+           (dom/div {:style (merge {:background-color "red"})}))
+    (is=el (om-dom/div #js {:style #js {:backgroundColor "red"}})
+           (dom/div {:style (when true {:background-color "red"})})))
+
   (testing "js values still work"
     (is=el (dom/div #js {} (dom/span #js {}))
            (om-dom/div #js {} (om-dom/span #js {})))

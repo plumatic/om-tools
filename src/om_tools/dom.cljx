@@ -13,6 +13,14 @@
 (defn clj->js [v]
   (JSValue. v))
 
+#+clj
+(defn literal?
+  "Returns true if form is a literal value (number, string, map, etc),
+  otherwise false."
+  [form]
+  (not (or (symbol? form)
+           (list? form))))
+
 (defn camel-case
   "Converts kebab-case to camelCase"
   [s]
@@ -34,30 +42,44 @@
     :for :htmlFor
     opt))
 
-(defn format-opt-key [opt-key]
+(defn format-opt-key
+  "Returns potentially formatted name for DOM element attribute.
+   Converts kebab-case to camelCase."
+  [opt-key]
   (-> opt-key
       opt-key-alias
       name
       opt-key-case
       keyword))
 
-(defn format-opt-val [opt-val]
-  (if (map? opt-val)
-    (clj->js opt-val)
-    opt-val))
+(declare format-opts)
+
+(defn format-opt-val
+  "Returns potentially modified value for DOM element attribute.
+   Recursively formats map values (ie :style attribute)"
+  [opt-val]
+  (cond
+   (map? opt-val)
+   (format-opts opt-val)
+
+   #+clj
+   (not (literal? opt-val))
+   #+clj
+   `(format-opts ~opt-val)
+
+   :else
+   opt-val))
 
 (defn format-opts
   "Returns JavaScript object for React DOM attributes from opts map"
   [opts]
-  (->> opts
-       (clojure.core/map
-        (fn [[k v]] [(format-opt-key k) (format-opt-val v)]))
-       (into {})
-       clj->js))
-
-(defn ^boolean literal? [form]
-  (not (or (symbol? form)
-           (list? form))))
+  (if (map? opts)
+    (->> opts
+         (clojure.core/map
+          (fn [[k v]] [(format-opt-key k) (format-opt-val v)]))
+         (into {})
+         clj->js)
+    opts))
 
 (defn ^boolean possible-coll? [form]
   (or (coll? form)
@@ -76,7 +98,10 @@
 (defn object? [x]
   (instance? JSValue x))
 
-(defn element-args [opts children]
+(defn element-args
+  "Returns a vector of [opts children] for from first and second
+  argument given to DOM function"
+  [opts children]
   (cond
    (nil? opts) [nil children]
    (map? opts) [(format-opts opts) children]
