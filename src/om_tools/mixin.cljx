@@ -12,7 +12,7 @@
 #+clj
 (def ^:private mixin-methods
   {'display-name       :getDisplayName
-   ;;'init-state         :getInitialState
+   'init-state         :getInitialState
    'will-mount         :componentWillMount
    'did-mount          :componentDidMount
    'will-unmount       :componentWillUnmount
