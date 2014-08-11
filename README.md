@@ -8,7 +8,7 @@ Leiningen dependency (Clojars):
 
 ```clojure
 [prismatic/om-tools "0.2.3"] ;; for om <  "0.7.0"
-[prismatic/om-tools "0.3.0"] ;; for om >= "0.7.0"
+[prismatic/om-tools "0.3.1"] ;; for om >= "0.7.0"
 ```
 
 **This is an alpha release. The API and organizational structure are
