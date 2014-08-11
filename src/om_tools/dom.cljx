@@ -34,17 +34,33 @@
     :for :htmlFor
     opt))
 
-(defn format-opt-key [opt-key]
+(defn format-opt-key
+  "Returns potentially formatted name for DOM element attribute.
+   Converts kebab-case to camelCase."
+  [opt-key]
   (-> opt-key
       opt-key-alias
       name
       opt-key-case
       keyword))
 
-(defn format-opt-val [opt-val]
-  (if (map? opt-val)
-    (clj->js opt-val)
-    opt-val))
+(declare format-opts)
+
+(defn format-opt-val
+  "Returns potentially modified value for DOM element attribute.
+   Recursively formats map values (ie :style attribute)"
+  [opt-val]
+  (cond
+   (map? opt-val)
+   (format-opts opt-val)
+
+   #+clj
+   (symbol? opt-val)
+   #+clj
+   `(format-opts ~opt-val)
+
+   :else
+   opt-val))
 
 (defn format-opts
   "Returns JavaScript object for React DOM attributes from opts map"
@@ -76,7 +92,10 @@
 (defn object? [x]
   (instance? JSValue x))
 
-(defn element-args [opts children]
+(defn element-args
+  "Returns a vector of [opts children] for from first and second
+  argument given to DOM function"
+  [opts children]
   (cond
    (nil? opts) [nil children]
    (map? opts) [(format-opts opts) children]
