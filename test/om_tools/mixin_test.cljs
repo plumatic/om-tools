@@ -120,4 +120,4 @@
               (done)
               (.. js/document -body (removeChild e)))
             12)))
-       100))))
+       92))))
