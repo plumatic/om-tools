@@ -57,6 +57,9 @@
 
 #+clj
 (defn component-spec
+  "Returns a seq of quoted forms to be used inside reify/defrecord.
+   Handles making Om lifecycle protocols explicit from partial-spec and
+   merging in default implementations when not present in partial-spec."
   ([partial-spec] (component-spec partial-spec nil))
   ([partial-spec default-spec-map]
      (mapcat
@@ -66,6 +69,7 @@
 
 #+clj
 (defn spec-map-defaults
+  "Returns a map of protocol symbol to default implemenation"
   [name-sym]
   {`om/IDisplayName [`(~'display-name [~'_] ~(name name-sym))]})
 
