@@ -74,8 +74,8 @@ And with `om-tools.dom`:
 
 The `om-tools.core/defcomponent` macro defines Om component
 constructor functions.
-It has two main advantages over the ordinary `defn` & `reify`
-approach:
+
+Advantages over the ordinary `defn` & `reify` approach:
 
 *   Adds [Schema][schema] support to specify and validate the data
     when component is built.
@@ -96,6 +96,7 @@ approach:
 *   Removes boilerplate code around using `reify` to instantiate
     objects with Om lifecycle methods. Component definitions become
     much smaller and easier to read.
+*   Automatically implements `IDisplayName` for better debugging messages.
 
 Example of `defcomponent` including schema annotation:
 

@@ -32,16 +32,46 @@
    'render-state       `om/IRenderState})
 
 #+clj
-(defn add-component-protocols
-  "Returns forms after adding appropriate Om protocols before any
-  recognized lifecycle method names."
-  [forms]
-  (mapcat
-   (fn [form]
-     (if-let [protocol (when (seq? form) (component-protocols (first form)))]
-       [protocol form]
-       [form]))
-   forms))
+(defn partial-spec->spec-map
+  "Returns a map from protocol-or-object symbol to seq of method
+   implementations forms (for reify), given a partial-spec. A
+   partial-spec is a seq of forms that would be given to reify, except
+   that Om lifecycle protocols do not need to be explicitly included."
+  [partial-spec]
+  (first
+   (reduce
+    (fn [[specs protocol] form]
+      (cond
+       (symbol? form) [specs form]
+
+       (seq? form)
+       (let [method (first form)
+             om-protocol (component-protocols method)
+             protocol (or om-protocol protocol 'object)]
+         [(update-in specs [protocol] (fnil conj []) form) (when-not om-protocol protocol)])
+
+       :else
+       (throw (Exception. (str "Unknown form in component spec: " form)))))
+    [{} nil]
+    partial-spec)))
+
+#+clj
+(defn component-spec
+  "Returns a seq of quoted forms to be used inside reify/defrecord.
+   Handles making Om lifecycle protocols explicit from partial-spec and
+   merging in default implementations when not present in partial-spec."
+  ([partial-spec] (component-spec partial-spec nil))
+  ([partial-spec default-spec-map]
+     (mapcat
+      (fn [[protocol methods]] (cons protocol methods))
+      (merge default-spec-map
+             (partial-spec->spec-map partial-spec)))))
+
+#+clj
+(defn spec-map-defaults
+  "Returns a map of protocol symbol to default implemenation"
+  [name-sym]
+  {`om/IDisplayName [`(~'display-name [~'_] ~(name name-sym))]})
 
 #+clj
 (defn convenience-constructor
@@ -173,7 +203,7 @@
    can be specified if needed."
   [& body]
   (assert-valid-component body)
-  `(reify ~@(add-component-protocols body)))
+  `(reify ~@(component-spec body)))
 
 (defmacro defcomponent
   "Defines a function that returns an om.core/IRender or om.core/IRenderState
@@ -223,7 +253,7 @@
          ~@(when attr-map? [attr-map?])
          ~arglist
          ~@(when prepost-map? [prepost-map?])
-         (component ~@body))
+         (reify ~@(component-spec body (spec-map-defaults name))))
        ~(convenience-constructor name descriptor-sym))))
 
 (defmacro defcomponentk
@@ -268,7 +298,7 @@
          ((p/fnk
             ~arglist
             ~@(when prepost-map? [prepost-map?])
-            (component ~@body))
+            (reify ~@(component-spec body (spec-map-defaults name))))
           {:data data#
            :owner ~owner-sym
            :opts opts#

@@ -1,3 +1,7 @@
+## 0.3.3
+
+*   Automatically generate IDisplayName when not explicitly defined.
+
 ## 0.3.2
 
 *   Fix DOM functions to properly handle non-literal nested attributes

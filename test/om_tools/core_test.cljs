@@ -29,6 +29,10 @@
   (render [_] :render)
   (render-state [_ _] :render-state))
 
+(defcomponent test-default-display-name-component
+  [data owner]
+  (render [_] :render))
+
 (deftest defcomponent-test
   (testing "defs"
     (is (fn? test-component))
@@ -50,7 +54,11 @@
     (is (thrown? js/Error (test-component {:foo :bar :bar "bar"} nil)))
     (is (thrown? js/Error (test-component {:foo {} :bar "bar"} nil))))
   (testing "build constructor"
-    (is (. js/React (isValidComponent (->test-component {:foo "foo" :bar "bar"}))))))
+    (is (. js/React (isValidComponent (->test-component {:foo "foo" :bar "bar"})))))
+  (testing "default display-name"
+    (let [c (test-default-display-name-component {} nil)]
+      (is (satisfies? om/IDisplayName c))
+      (is (= "test-default-display-name-component" (om/display-name c))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -67,6 +75,10 @@
   (will-receive-props [_ _] :will-receive-props)
   (render [_] :render)
   (render-state [_ _] :render-state))
+
+(defcomponentk test-default-display-name-componentk
+  []
+  (render [_] :render))
 
 (deftest defcomponentk-test
   (testing "defs"
@@ -89,7 +101,12 @@
     (is (thrown? js/Error (test-componentk {:foo :bar :bar "bar"} nil)))
     (is (thrown? js/Error (test-componentk {:foo {} :bar "bar"} nil))))
   (testing "build constructor"
-    (is (. js/React (isValidComponent (->test-componentk {:foo "foo" :bar "bar"}))))))
+    (is (. js/React (isValidComponent (->test-componentk {:foo "foo" :bar "bar"})))))
+  (testing "default display-name"
+    (let [c (test-default-display-name-componentk {} nil)]
+      (is (satisfies? om/IDisplayName c))
+      (println (om/display-name c))
+      (is (= "test-default-display-name-componentk" (om/display-name c))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
