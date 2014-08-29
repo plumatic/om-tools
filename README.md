@@ -35,7 +35,7 @@ minimal runtime overhead to make the following improvements:
     optional. You don't need to use the `#js` reader macro or `nil`
     for no attributes.
 *   More natural attribute names. We translate attributes like
-    `:class` to `:className` and `:on-click` to `:onClick` to stay
+    `:className` to `:class` and `:onClick` to `:on-click` to stay
     consistent with Clojure naming conventions.
 *   Children can be in collections.  You don't need to use `apply` if
     you have a sequence of children or use `concat` for combining
