@@ -1,3 +1,7 @@
+## 0.3.4
+
+*   Fix exception thrown when defcomponent(k) form is invalid
+
 ## 0.3.3
 
 *   Automatically generate IDisplayName when not explicitly defined.
