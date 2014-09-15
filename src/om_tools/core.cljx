@@ -142,7 +142,7 @@
   [body]
   (when-let [invalid-form (first (remove valid-component-form? body))]
     (throw (IllegalArgumentException.
-            "Unexpected form in body of component: " invalid-form))))
+            (str "Unexpected form in body of component: " invalid-form)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public
