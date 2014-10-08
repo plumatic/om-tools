@@ -115,7 +115,8 @@
 
 #+clj
 (defn ^:private gen-om-dom-inline-fn [tag]
-  `(defmacro ~tag [opts# & children#]
+  `(defmacro ~tag [& [opts# & children#]]
+     {:arglists '([opts? & chilren])}
      (let [ctor# '~(el-ctor tag)]
        (if (literal? opts#)
          (let [[opts# children#] (element-args opts# children#)]

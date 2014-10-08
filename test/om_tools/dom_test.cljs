@@ -101,6 +101,9 @@
   (testing "simple tag"
     (is=el (dom/a "test") (om-dom/a nil "test")))
 
+  (testing "zero args"
+    (is=el (dom/br) (om-dom/br nil)))
+
   (testing "simple opts"
     (is=el (dom/a {:href "/test"} "test")
            (om-dom/a #js {:href "/test"} "test")))
