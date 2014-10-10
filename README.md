@@ -217,6 +217,41 @@ keys:
     {:target (. js/document (getElementById "app"))})
 ```
 
+### `defcomponentmethod`
+
+With Om, [multimethods](http://clojure.org/multimethods) can be used
+instead of normal functions to create polymorphic components (requires
+Om version 0.7.0+).
+The `defcomponentmethod` macro allows you to register components using
+the normal om-tools syntax.
+
+```clojure
+(defmulti fruit-basket-item
+  (fn [fruit owner] (:type fruit)))
+
+(defcomponentmethod fruit-basket-item :orange
+  [orange owner]
+  (render [_]
+    (dom/label "Orange")))
+
+(defcomponentmethod fruit-basket-item :banana
+  [banana owner]
+  (render [_]
+    (dom/label
+     {:class (when (:peeled? banana) "peeled")}
+     "Banana")))
+
+(defcomponentmethod fruit-basket-item :default
+  [fruit owner]
+  (render [_]
+    (dom/label (str "Unknown fruit: " (name (:type fruit))))))
+
+(om/build-all fruit-basket-item
+              [{:type :banana}
+               {:type :pineapple}
+               {:type :orange}])
+```
+
 ### State Proxy (experimental)
 
 A component using `defcomponntk` can use the key, `:state`, to access

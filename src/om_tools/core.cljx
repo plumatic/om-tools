@@ -261,7 +261,7 @@
    instance. Follows the same pattern as plumbing.core/defnk, except that
    the body is a set of Om lifecycle-method implementations.
 
-   Refer to defcomponent doc-string for supported lifecycle-methods and
+   Refer to (doc defcomponent) for supported lifecycle-methods and
    component options.
 
    The arguments receive a map with the following keys:
@@ -307,6 +307,30 @@
            ~@(when (util/possibly-destructured? :state arglist)
                [:state `(state-proxy ~owner-sym)])}))
        ~(convenience-constructor name descriptor-sym))))
+
+(defmacro defcomponentmethod
+  "Like clojure.core/defmethod, but body is parsed like defcomponent.
+
+   Multimethod components can be used to dynamically mount different components definitions
+   under same component name.
+
+   The signature of the multimethod's dispatch function should same as Om component
+   constructor. Arguments support schema-style typehints (see schema.macros/defn
+   for more details)
+
+   Refer to (doc defcomponent) for supported lifecycle-methods and
+   component options.
+
+   Does not support :mixins option"
+  [multifn dispatch-val & fn-tail]
+  (let [[fn-name? [args & body]] (util/maybe-split-first symbol? fn-tail)
+        [config body] (separate-component-config body)]
+    (assert (vector? args) "Parameter declaration should be a vector")
+    (assert (not (:mixins config)) "Mixins are not suppoted in multi-component")
+    `(sm/defmethod ~multifn ~dispatch-val
+       ~@(when fn-name? [fn-name?])
+       ~args
+       (reify ~@(component-spec body)))))
 
 #+cljs
 (defn set-state?!
