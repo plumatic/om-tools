@@ -6,11 +6,15 @@
   (:require
    cemerick.cljs.test
    [clojure.set :as set]
-   [om-tools.core :as om-tools :refer-macros [defcomponent defcomponentk]]
+   [om-tools.core :as om-tools :refer-macros [defcomponent defcomponentk defcomponentmethod]]
    [om-tools.dom :as dom :include-macros true]
    [om.core :as om]
    [schema.core :as s]
    [schema.test :as schema-test]))
+
+(enable-console-print!)
+
+(def ReactTestUtils (.. js/React -addons -TestUtils))
 
 (sm/defschema TestComponent
   {:foo s/Str :bar s/Str})
@@ -105,7 +109,6 @@
   (testing "default display-name"
     (let [c (test-default-display-name-componentk {} nil)]
       (is (satisfies? om/IDisplayName c))
-      (println (om/display-name c))
       (is (= "test-default-display-name-componentk" (om/display-name c))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -204,6 +207,55 @@
        componentk-with-prepost-map))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmulti fruit-basket-item
+  (fn [fruit owner] (:type fruit)))
+
+(defcomponentmethod fruit-basket-item :default
+  [fruit owner]
+  (render [_]
+    (dom/label (str "Unknown fruit: " (name (:type fruit))))))
+
+(defcomponentmethod fruit-basket-item :orange
+  [orange _]
+  (render [_]
+    (dom/label "Orange")))
+
+(defcomponentmethod fruit-basket-item :banana
+  [banana :- {:peeled? s/Bool, s/Any s/Any} _]
+  (render [_]
+    (dom/label (str "Banana" (when (:peeled? banana) " (peeled)")))))
+
+(defcomponentmethod fruit-basket-item :apple
+  [apple :- {:variety s/Keyword, s/Any s/Any} _]
+  (render [_]
+    (dom/label
+     (if (= (:variety apple) :red-delicious)
+       "Apple (gross)"
+       "Apple"))))
+
+(defcomponentk fruit-basket
+  [[:data fruits :- [{:type s/Keyword, s/Any s/Any}]]]
+  (render [_]
+    (dom/div
+     (om/build-all fruit-basket-item fruits))))
+
+(deftest multicomponent-test
+  (let [fruits [{:type :apple :variety :granny-smith}
+                {:type :banana :peeled? true}
+                {:type :apple :variety :red-delicious}
+                {:type :pineapple}
+                {:type :orange}]
+        c (om/build fruit-basket {:fruits fruits})
+        div (.createElement js/document "div")
+        d (.renderComponent js/React c div)]
+    (is (= ["Apple"
+            "Banana (peeled)"
+            "Apple (gross)"
+            "Unknown fruit: pineapple"
+            "Orange"]
+           (for [label (.scryRenderedDOMComponentsWithTag ReactTestUtils d "label")]
+             (.. label -props -children))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

@@ -52,12 +52,11 @@
                            "test/vendor/es5-shim.js"
                            "test/vendor/es5-sham.js"
                            "test/vendor/console-polyfill.js"
-                           "this.literal_js_was_evaluated=true"
                            "target/om_tools.js"]}
    :builds [{:id "test"
              :source-paths ["src" "test" "target/generated/src"]
              :compiler {:output-to "target/om_tools.js"
                         :optimizations :whitespace
                         :pretty-print true
-                        :preamble ["react/react.min.js"]
+                        :preamble ["react/react_with_addons.js"]
                         :externs ["react/externs/react.js"]}}]})

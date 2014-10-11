@@ -23,6 +23,9 @@ useful when building components with Om's API.
 
 *   [DOM tools](#dom-tools)
 *   [Components tools](#component-tools)
+    *   [`defcomponent`](#defcomponent)
+    *   [`defcomponentk`](#defcomponentk)
+    *   [`defcomponentmethod`](#defcomponentmethod)
 *   [Mixin tools](#mixin-tools)
 
 ## DOM tools
@@ -217,7 +220,7 @@ keys:
     {:target (. js/document (getElementById "app"))})
 ```
 
-### State Proxy (experimental)
+#### State Proxy (experimental)
 
 A component using `defcomponntk` can use the key, `:state`, to access
 an atom-like object that conveniently wraps `om.core/get-state` and
@@ -245,6 +248,42 @@ It's important to note that while `state` looks and behaves like
 an `atom`, there is at least one minor difference: changes made by
 `swap!` and `reset!` are not immediately available if you `deref`
 in the same render phase.
+
+### `defcomponentmethod`
+
+With Om, [multimethods](http://clojure.org/multimethods) can be used
+instead of normal functions to create polymorphic components (requires
+Om version 0.7.0+).
+The `defcomponentmethod` macro allows you to register components into
+a multimethod (created from `cljs.core/defmulti`), while using
+the normal om-tools syntax.
+
+```clojure
+(defmulti fruit-basket-item
+  (fn [fruit owner] (:type fruit)))
+
+(defcomponentmethod fruit-basket-item :orange
+  [orange owner]
+  (render [_]
+    (dom/label "Orange")))
+
+(defcomponentmethod fruit-basket-item :banana
+  [banana owner]
+  (render [_]
+    (dom/label
+     {:class (when (:peeled? banana) "peeled")}
+     "Banana")))
+
+(defcomponentmethod fruit-basket-item :default
+  [fruit owner]
+  (render [_]
+    (dom/label (str "Unknown fruit: " (name (:type fruit))))))
+
+(om/build-all fruit-basket-item
+              [{:type :banana}
+               {:type :pineapple}
+               {:type :orange}])
+```
 
 ## Mixin tools
 
