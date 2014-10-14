@@ -291,21 +291,22 @@
         owner-sym (gensym "owner")]
     `(do
        ~descriptor
-       (defn ~name
-         ~@(when doc-string? [doc-string?])
-         ~@(when attr-map? [attr-map?])
-         [data# ~owner-sym & [opts#]]
-         ((p/fnk
-            ~arglist
-            ~@(when prepost-map? [prepost-map?])
-            (reify ~@(component-spec body (spec-map-defaults name))))
-          {:data data#
-           :owner ~owner-sym
-           :opts opts#
-           ~@(when (util/possibly-destructured? :shared arglist)
-               [:shared `(om/get-shared ~owner-sym)])
-           ~@(when (util/possibly-destructured? :state arglist)
-               [:state `(state-proxy ~owner-sym)])}))
+       (let [component-fnk# (p/fnk
+                              ~arglist
+                              ~@(when prepost-map? [prepost-map?])
+                              (reify ~@(component-spec body (spec-map-defaults name))))]
+         (defn ~name
+           ~@(when doc-string? [doc-string?])
+           ~@(when attr-map? [attr-map?])
+           [data# ~owner-sym & [opts#]]
+           (component-fnk#
+            {:data data#
+             :owner ~owner-sym
+             :opts opts#
+             ~@(when (util/possibly-destructured? :shared arglist)
+                 [:shared `(om/get-shared ~owner-sym)])
+             ~@(when (util/possibly-destructured? :state arglist)
+                 [:state `(state-proxy ~owner-sym)])})))
        ~(convenience-constructor name descriptor-sym))))
 
 (defmacro defcomponentmethod
