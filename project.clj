@@ -1,4 +1,4 @@
-(defproject prismatic/om-tools "0.3.5-SNAPSHOT"
+(defproject prismatic/om-tools "0.3.5"
   :description "Tools for building Om applications"
   :url "http://github.com/prismatic/om-tools"
   :license {:name "Eclipse Public License - v 1.0"
