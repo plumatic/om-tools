@@ -289,11 +289,11 @@
         [config body] (separate-component-config body)
         [descriptor-sym descriptor] (mixin-descriptor name (:mixins config))
         owner-sym (gensym "owner")
-        fnk-name (with-meta (gensym name)
-                   (select-keys (meta name) [:always-validate :never-validate]))]
+        constructor (with-meta (gensym 'constructor)
+                      (select-keys (meta name) [:always-validate :never-validate]))]
     `(do
        ~descriptor
-       (let [component-fnk# (p/fnk ~fnk-name ~arglist
+       (let [component-fnk# (p/fnk ~constructor ~arglist
                               ~@(when prepost-map? [prepost-map?])
                               (reify ~@(component-spec body (spec-map-defaults name))))]
          (defn ~name
