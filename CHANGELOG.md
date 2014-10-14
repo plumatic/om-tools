@@ -2,6 +2,7 @@
 
 *   Fix exception thrown when defcomponent(k) form is invalid
 *   Add `om-tools.core/defcomponent` macro to register components in multimethod
+*   Improve performance of components defined with `defcomponentk`
 
 ## 0.3.3
 
