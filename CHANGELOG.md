@@ -1,3 +1,7 @@
+## 0.3.5
+
+*   Removed org.clojure/clojure and com.keminglabs/cljx as dependencies
+
 ## 0.3.4
 
 *   Fix exception thrown when defcomponent(k) form is invalid
