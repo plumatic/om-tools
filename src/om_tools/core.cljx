@@ -288,11 +288,12 @@
         [prepost-map? body] (util/maybe-split-first map? args)
         [config body] (separate-component-config body)
         [descriptor-sym descriptor] (mixin-descriptor name (:mixins config))
-        owner-sym (gensym "owner")]
+        owner-sym (gensym "owner")
+        constructor (with-meta (gensym 'constructor)
+                      (select-keys (meta name) [:always-validate :never-validate]))]
     `(do
        ~descriptor
-       (let [component-fnk# (p/fnk
-                              ~arglist
+       (let [component-fnk# (p/fnk ~constructor ~arglist
                               ~@(when prepost-map? [prepost-map?])
                               (reify ~@(component-spec body (spec-map-defaults name))))]
          (defn ~name
