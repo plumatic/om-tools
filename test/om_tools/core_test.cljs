@@ -37,6 +37,14 @@
   [data owner]
   (render [_] :render))
 
+(defcomponent ^:always-validate test-always-validate-component
+  [data :- {:items [s/Keyword]} owner]
+  (render [_] (apply str (:items data))))
+
+(defcomponent ^:never-validate test-never-validate-component
+  [data :- {:items [s/Keyword]} owner]
+  (render [_] (apply str (:items data))))
+
 (deftest defcomponent-test
   (testing "defs"
     (is (fn? test-component))
@@ -62,7 +70,14 @@
   (testing "default display-name"
     (let [c (test-default-display-name-component {} nil)]
       (is (satisfies? om/IDisplayName c))
-      (is (= "test-default-display-name-component" (om/display-name c))))))
+      (is (= "test-default-display-name-component" (om/display-name c)))))
+  (testing "schema metadata"
+    (sm/with-fn-validation
+      (is (test-never-validate-component {:items :not-expected} nil)
+          "Component marked ^:never-validate should not throw (when validation turned on)"))
+    (sm/without-fn-validation
+     (is (thrown? js/Error (test-always-validate-component {:items :not-expected} nil))
+         "Component marked ^:always-validate should throw (when validation turned off)"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -84,6 +99,14 @@
   []
   (render [_] :render))
 
+(defcomponentk ^:always-validate test-always-validate-componentk
+  [[:data items :- [s/Keyword]]]
+  (render [_] (apply str items)))
+
+(defcomponentk ^:never-validate test-never-validate-componentk
+  [[:data items :- [s/Keyword]]]
+  (render [_] (apply str items)))
+
 (deftest defcomponentk-test
   (testing "defs"
     (is (fn? test-componentk))
@@ -102,14 +125,22 @@
       (is (= :render (om/render c)))
       (is (= :render-state (om/render-state c nil)))))
   (testing "schema error"
-    (is (thrown? js/Error (test-componentk {:foo :bar :bar "bar"} nil)))
-    (is (thrown? js/Error (test-componentk {:foo {} :bar "bar"} nil))))
+    (sm/with-fn-validation
+      (is (thrown? js/Error (test-componentk {:foo :bar :bar "bar"} nil)))
+      (is (thrown? js/Error (test-componentk {:foo {} :bar "bar"} nil)))))
   (testing "build constructor"
     (is (. js/React (isValidComponent (->test-componentk {:foo "foo" :bar "bar"})))))
   (testing "default display-name"
     (let [c (test-default-display-name-componentk {} nil)]
       (is (satisfies? om/IDisplayName c))
-      (is (= "test-default-display-name-componentk" (om/display-name c))))))
+      (is (= "test-default-display-name-componentk" (om/display-name c)))))
+  (testing "schema metadata"
+    (sm/with-fn-validation
+      (is (test-never-validate-componentk {:items :not-expected} nil)
+          "Component marked ^:never-validate should not throw (when validation turned on)"))
+    (sm/without-fn-validation
+     (is (thrown? js/Error (test-always-validate-componentk {:items :not-expected} nil))
+         "Component marked ^:always-validate should throw (when validation turned off)"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
