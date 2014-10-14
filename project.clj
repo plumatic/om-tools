@@ -5,47 +5,38 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"
             :distribution :repo}
 
-  :dependencies [[org.clojure/clojure "1.5.1"]
-                 [prismatic/plumbing "0.3.2"]
+  :dependencies [[prismatic/plumbing "0.3.2"]
                  [prismatic/schema "0.2.4"]]
 
-  :plugins [[com.keminglabs/cljx "0.3.1"]
-            [lein-cljsbuild "1.0.3"]
-            [com.cemerick/clojurescript.test "0.3.0"]]
-
-  :profiles {:provided
-             {:dependencies [[org.clojure/clojurescript "0.0-2202"]
-                             [om "0.7.1"]]}
-             :dev {:dependencies [[com.keminglabs/cljx "0.3.1"]
+  :profiles {:dev {:dependencies [[org.clojure/clojure "1.6.0"]
+                                  [org.clojure/clojurescript "0.0-2202"]
+                                  [om "0.7.1"]
+                                  [com.keminglabs/cljx "0.3.1"]
                                   [prismatic/dommy "0.1.2"]]
-                   :cljsbuild
-                   {:builds
-                    [{:id "example/sliders"
-                      :source-paths ["src" "target/generated/src" "examples/sliders/src"]
-                      :compiler {:output-to "examples/sliders/main.js"
-                                 :output-dir "examples/sliders/out"
-                                 :optimizations :none}}
-                     {:id "example/mixin"
-                      :source-paths ["src" "target/generated/src" "examples/mixin/src"]
-                      :compiler {:output-to "examples/mixin/main.js"
-                                 :output-dir "examples/mixin/out"
-                                 :optimizations :none}}]}}}
+                   :plugins [[com.keminglabs/cljx "0.3.1"]
+                             [lein-cljsbuild "1.0.3"]
+                             [com.cemerick/clojurescript.test "0.3.0"]]
+                   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl
+                                                     cljx.repl-middleware/wrap-cljx]}
+                   :cljx
+                   {:builds [{:source-paths ["src"]
+                              :output-path "target/generated/src"
+                              :rules :clj}
+                             {:source-paths ["src"]
+                              :output-path "target/generated/src"
+                              :rules :cljs}]}}
+             :1.5 {:dependencies [[org.clojure/clojure "1.5.1"]]}}
+
+  :aliases {"all" ["with-profile" "dev:dev,1.5"]
+            "deploy" ["do" "clean," "cljx" "once," "deploy" "clojars"]
+            "test" ["do" "clean," "cljx" "once," "test," "with-profile" "dev" "cljsbuild" "test"]}
+
+  :jar-exclusions [#"\.cljx|\.swp|\.swo|\.DS_Store"]
 
   :lein-release {:deploy-via :shell
                  :shell ["lein" "deploy" "clojars"]}
-  :cljx
-  {:builds [{:source-paths ["src"]
-             :output-path "target/generated/src"
-             :rules :clj}
-            {:source-paths ["src"]
-             :output-path "target/generated/src"
-             :rules :cljs}]}
 
-  :prep-tasks ["cljx" "javac" "compile"]
-
-  :source-paths ["src" "target/generated/src"]
-
-  :hooks [leiningen.cljsbuild]
+  :source-paths ["target/generated/src" "src"]
 
   :cljsbuild
   {:test-commands {"unit" ["phantomjs" :runner
@@ -59,4 +50,14 @@
                         :optimizations :whitespace
                         :pretty-print true
                         :preamble ["react/react_with_addons.js"]
-                        :externs ["react/externs/react.js"]}}]})
+                        :externs ["react/externs/react.js"]}}
+            {:id "example/sliders"
+             :source-paths ["src" "target/generated/src" "examples/sliders/src"]
+             :compiler {:output-to "examples/sliders/main.js"
+                        :output-dir "examples/sliders/out"
+                        :optimizations :none}}
+            {:id "example/mixin"
+             :source-paths ["src" "target/generated/src" "examples/mixin/src"]
+             :compiler {:output-to "examples/mixin/main.js"
+                        :output-dir "examples/mixin/out"
+                        :optimizations :none}}]})
