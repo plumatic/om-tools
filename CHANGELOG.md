@@ -5,7 +5,7 @@
 ## 0.3.4
 
 *   Fix exception thrown when defcomponent(k) form is invalid
-*   Add `om-tools.core/defcomponent` macro to register components in multimethod
+*   Add `om-tools.core/defcomponentmethod` macro to register components in multimethod
 *   Improve performance of components defined with `defcomponentk`
 *   Enable Schema-style :always-validate and :never-validate metadata on
     defcomponentk
