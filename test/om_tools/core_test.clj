@@ -50,10 +50,10 @@
           '(om-tools.core/component
             (init-state [this] {:count 0})
             (render [this] (om.dom/h1 nil (:text data)))))))
-  (is (thrown-with-msg? IllegalArgumentException #"Unexpected form in body of component"
+  (is (thrown-with-msg? RuntimeException #"Unexpected form in body of component"
                         (macroexpand
-                          '(om-tools.core/component
-                             (render (om.dom/h1 nil (:text data))))))))
+                         '(om-tools.core/component
+                           (render (om.dom/h1 nil (:text data))))))))
 
 (deftest separate-component-config-test
   (are [forms out] (= out (om-tools/separate-component-config forms))
