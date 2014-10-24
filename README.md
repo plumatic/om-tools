@@ -80,6 +80,9 @@ constructor functions.
 
 Advantages over the ordinary `defn` & `reify` approach:
 
+*   Removes boilerplate code around using `reify` to instantiate
+    objects with Om lifecycle methods. Component definitions become
+    much smaller and easier to read.
 *   Adds [Schema][schema] support to specify and validate the data
     when component is built.
 
@@ -88,17 +91,15 @@ Advantages over the ordinary `defn` & `reify` approach:
     is
     [prop validation](http://facebook.github.io/react/docs/reusable-components.html#prop-validation),
     which allows a component's author to document and validate which
-    properties a component requires and their types. This
-    functionality is not utilized in Om because we use normal
+    properties a component requires and their types.
+
+    This functionality is not utilized in Om because we use normal
     ClojureScript data structures as component inputs. However, with
     more complex input structures, documentation and validation are
     even more important.
 
     Schema annotations are optional and validation is disabled by
     default.
-*   Removes boilerplate code around using `reify` to instantiate
-    objects with Om lifecycle methods. Component definitions become
-    much smaller and easier to read.
 *   Automatically implements `IDisplayName` for better debugging messages.
 
 Example of `defcomponent` including schema annotation:
