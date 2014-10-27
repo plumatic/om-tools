@@ -1,3 +1,8 @@
+## 0.3.6
+
+*   Upgrade dependency: schema 0.3.1
+*   Upgrade dependency: plumbing 0.3.5
+
 ## 0.3.5
 
 *   Removed org.clojure/clojure and com.keminglabs/cljx as dependencies

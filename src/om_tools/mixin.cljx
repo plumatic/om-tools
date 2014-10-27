@@ -3,7 +3,6 @@
   (:require
    [om.core :as om]
    #+clj [om-tools.util :as util]
-   #+clj [schema.macros :as sm]
    #+clj cljs.core)
   #+clj
   (:import

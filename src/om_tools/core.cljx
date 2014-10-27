@@ -1,14 +1,11 @@
 (ns om-tools.core
   "Tools for Om"
-  #+cljs
-  (:require-macros
-   [schema.macros :as sm])
   (:require
    [om.core :as om]
    [plumbing.fnk.schema]
    [plumbing.core :as p #+cljs :include-macros #+cljs true]
+   [schema.core :as s #+cljs :include-macros #+cljs true]
    #+clj [om-tools.util :as util]
-   #+clj [schema.macros :as sm]
    #+clj cljs.core)
   #+clj
   (:import
@@ -208,7 +205,7 @@
 (defmacro defcomponent
   "Defines a function that returns an om.core/IRender or om.core/IRenderState
    instance. Follows the same pattern as clojure.core/defn, except that
-    - Arguments support schema-style typehints (see schema.macros/defn for more details)
+    - Arguments support schema-style typehints (see schema.core/defn for more details)
     - The body is a set of Om lifecycle method-implementations
 
    Example:
@@ -248,7 +245,7 @@
         [descriptor-sym descriptor] (mixin-descriptor name (:mixins config))]
     `(do
        ~descriptor
-       (sm/defn ~name
+       (s/defn ~name
          ~@(when doc-string? [doc-string?])
          ~@(when attr-map? [attr-map?])
          ~arglist
@@ -317,7 +314,7 @@
    under same component name.
 
    The signature of the multimethod's dispatch function should same as Om component
-   constructor. Arguments support schema-style typehints (see schema.macros/defn
+   constructor. Arguments support schema-style typehints (see schema.core/defn
    for more details)
 
    Refer to (doc defcomponent) for supported lifecycle-methods and
@@ -329,7 +326,7 @@
         [config body] (separate-component-config body)]
     (assert (vector? args) "Parameter declaration should be a vector")
     (assert (not (:mixins config)) "Mixins are not suppoted in multi-component")
-    `(sm/defmethod ~multifn ~dispatch-val
+    `(s/defmethod ~multifn ~dispatch-val
        ~@(when fn-name? [fn-name?])
        ~args
        (reify ~@(component-spec body)))))
