@@ -1,22 +1,21 @@
 (ns om-tools.core-test
   (:require-macros
    [cemerick.cljs.test :refer [is are deftest testing use-fixtures done]]
-   [om-tools.test-utils :refer [with-element]]
-   [schema.macros :as sm])
+   [om-tools.test-utils :refer [with-element]])
   (:require
    cemerick.cljs.test
    [clojure.set :as set]
    [om-tools.core :as om-tools :refer-macros [defcomponent defcomponentk defcomponentmethod]]
    [om-tools.dom :as dom :include-macros true]
    [om.core :as om]
-   [schema.core :as s]
+   [schema.core :as s :include-macros true]
    [schema.test :as schema-test]))
 
 (enable-console-print!)
 
 (def ReactTestUtils (.. js/React -addons -TestUtils))
 
-(sm/defschema TestComponent
+(s/defschema TestComponent
   {:foo s/Str :bar s/Str})
 
 (defcomponent test-component
@@ -72,10 +71,10 @@
       (is (satisfies? om/IDisplayName c))
       (is (= "test-default-display-name-component" (om/display-name c)))))
   (testing "schema metadata"
-    (sm/with-fn-validation
+    (s/with-fn-validation
       (is (test-never-validate-component {:items :not-expected} nil)
           "Component marked ^:never-validate should not throw (when validation turned on)"))
-    (sm/without-fn-validation
+    (s/without-fn-validation
      (is (thrown? js/Error (test-always-validate-component {:items :not-expected} nil))
          "Component marked ^:always-validate should throw (when validation turned off)"))))
 
@@ -125,7 +124,7 @@
       (is (= :render (om/render c)))
       (is (= :render-state (om/render-state c nil)))))
   (testing "schema error"
-    (sm/with-fn-validation
+    (s/with-fn-validation
       (is (thrown? js/Error (test-componentk {:foo :bar :bar "bar"} nil)))
       (is (thrown? js/Error (test-componentk {:foo {} :bar "bar"} nil)))))
   (testing "build constructor"
@@ -135,10 +134,10 @@
       (is (satisfies? om/IDisplayName c))
       (is (= "test-default-display-name-componentk" (om/display-name c)))))
   (testing "schema metadata"
-    (sm/with-fn-validation
+    (s/with-fn-validation
       (is (test-never-validate-componentk {:items :not-expected} nil)
           "Component marked ^:never-validate should not throw (when validation turned on)"))
-    (sm/without-fn-validation
+    (s/without-fn-validation
      (is (thrown? js/Error (test-always-validate-componentk {:items :not-expected} nil))
          "Component marked ^:always-validate should throw (when validation turned off)"))))
 

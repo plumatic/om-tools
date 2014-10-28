@@ -1,16 +1,13 @@
 (ns om-tools.mixin-test
   (:require-macros
    [cemerick.cljs.test :refer [is are deftest testing use-fixtures done]]
-   [om-tools.test-utils :refer [with-element]]
-   [schema.macros :as sm])
+   [om-tools.test-utils :refer [with-element]])
   (:require
    cemerick.cljs.test
    [om-tools.mixin :refer-macros [defmixin]]
    [om-tools.core :as om-tools :refer-macros [defcomponent defcomponentk]]
    [om-tools.dom :as dom :include-macros true]
-   [om.core :as om]
-   [schema.core :as s]
-   [schema.test :as schema-test]))
+   [om.core :as om]))
 
 (defmixin stub-mixin
   (display-name [_] :display-name)

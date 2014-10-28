@@ -5,8 +5,8 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"
             :distribution :repo}
 
-  :dependencies [[prismatic/plumbing "0.3.2"]
-                 [prismatic/schema "0.2.4"]]
+  :dependencies [[prismatic/plumbing "0.3.5"]
+                 [prismatic/schema "0.3.1"]]
 
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.6.0"]
                                   [org.clojure/clojurescript "0.0-2202"]

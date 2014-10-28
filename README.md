@@ -183,11 +183,10 @@ keys:
 
 ```clojure
 (ns example
-  (:require-macros
-    [schema.macros :refer [defschema]])
   (:require
     [om.core :as om]
-    [om-tools.core :refer-macros [defcomponentk]]))
+    [om-tools.core :refer-macros [defcomponentk]]
+    [schema.core :refer-macros [defschema]]))
 
 (defschema ProgressBar
   {:value js/Number
@@ -216,7 +215,7 @@ keys:
   {:target (. js/document (getElementById "app"))})
 
 ;; Throws error: Value does not match schema
-(schema.macros/with-fn-validation
+(schema.core/with-fn-validation
   (om/root progress-bar {:value "42"}
     {:target (. js/document (getElementById "app"))})
 ```

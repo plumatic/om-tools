@@ -1,27 +1,26 @@
 (ns om-tools.schema-test
   (:require-macros
-   [om-tools.test-utils :refer [with-element]]
-   [schema.macros :as sm])
+   [om-tools.test-utils :refer [with-element]])
   (:require
    [om-tools.schema :as schema]
    [om-tools.core :as ot :include-macros true :refer [defcomponentk]]
    [om-tools.dom :as dom :include-macros true]
-   [schema.core :as s]
+   [schema.core :as s :include-macros true]
    [schema.test :as schema-test]
    [om.core :as om]
    [cemerick.cljs.test :as t :include-macros true :refer [deftest is use-fixtures]]))
 
-(sm/defschema Item
+(s/defschema Item
   {:id s/Int :name s/Str})
 
-(sm/defschema ItemScores
+(s/defschema ItemScores
   {s/Int s/Num})
 
-(sm/defschema App
+(s/defschema App
   {:items [Item]
    :item-scores ItemScores})
 
-(sm/defschema ItemList
+(s/defschema ItemList
   {:items (schema/cursor [Item])      ;; om.core/IndexedCursor
    :scores (schema/cursor ItemScores) ;; om.core/MapCursor
    :order s/Keyword})

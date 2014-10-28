@@ -1,11 +1,9 @@
 (ns om-tools.schema
-  (:require-macros
-   [schema.macros :as sm])
   (:require
-   [schema.core :as s]
+   [schema.core :as s :include-macros true]
    [om.core :as om]))
 
-(sm/defschema Cursor (s/pred om/cursor?))
+(s/defschema Cursor (s/pred om/cursor?))
 
 (defn cursor
   "Returns a schema to validate an Om cursor"
