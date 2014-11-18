@@ -19,7 +19,8 @@
   otherwise false."
   [form]
   (not (or (symbol? form)
-           (list? form))))
+           (list? form)
+           (= (class form) clojure.lang.Cons))))
 
 (defn camel-case
   "Converts kebab-case to camelCase"
