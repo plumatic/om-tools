@@ -114,7 +114,10 @@
 
   (testing "runtime opts"
     (is=el (dom/a (when true {:href "/test"}) "test")
-           (om-dom/a (when true #js {:href "/test"}) "test")))
+           (om-dom/a (when true #js {:href "/test"}) "test"))
+    (doseq [non-opt [(dom/div "ok?") "ok?" :ok? 0 0.0 true false js/undefined]]
+      (is=el (dom/div non-opt)
+             (om-dom/div nil non-opt))))
 
   (testing "runtime children"
     (is=el (dom/a (when true "foo") "bar")

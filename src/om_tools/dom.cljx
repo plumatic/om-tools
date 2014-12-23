@@ -94,9 +94,17 @@
     (symbol "om.dom" (name tag))
     (symbol "js" (str "React.DOM." (name tag)))))
 
-#+clj
-(defn object? [x]
-  (instance? JSValue x))
+#+cljs
+(defn ^boolean valid-element? [x]
+  ((or (.-isValidElement js/React) ;; React 0.12.0+
+       (.-isValidComponent js/React))
+   x))
+
+(defn js-opts? [x]
+  #+clj
+  (instance? JSValue x)
+  #+cljs
+  (and (object? x) (not (valid-element? x))))
 
 (defn element-args
   "Returns a vector of [opts children] for from first and second
@@ -105,7 +113,7 @@
   (cond
    (nil? opts) [nil children]
    (map? opts) [(format-opts opts) children]
-   (object? opts) [opts children]
+   (js-opts? opts) [opts children]
    :else [nil (cons opts children)]))
 
 #+cljs

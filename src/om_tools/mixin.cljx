@@ -49,7 +49,7 @@
            (cljs.core/this-as ~this-sym
              ((fn ~@orig-body)
               ~this-sym
-              (om/get-props ~(JSValue. {:props next-props-sym}))
+              (om/get-props ~(JSValue. {:props next-props-sym :isOmComponent true}))
               (om/get-state ~this-sym)))))))
 
   (defmethod mixin-method-body 'did-update
@@ -62,7 +62,7 @@
          (cljs.core/this-as ~this-sym
            ((fn ~@orig-body)
             ~this-sym
-            (om/get-props ~(JSValue. {:props prev-props-sym}))
+            (om/get-props ~(JSValue. {:props prev-props-sym :isOmComponent true}))
             (or (cljs.core/aget ~this-sym "state" "__om_prev_state")
                 (om/get-state ~this-sym)))))))
 
@@ -76,7 +76,7 @@
          (cljs.core/this-as ~this-sym
            ((fn ~@orig-body)
             ~this-sym
-            (om/get-props ~(JSValue. {:props next-props-sym}))))))))
+            (om/get-props ~(JSValue. {:props next-props-sym :isOmComponent true}))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; defmixin validation

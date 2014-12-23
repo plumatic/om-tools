@@ -291,7 +291,7 @@
 (deftest set-state?!-test
   (let [mem (atom {})
         calls (atom {})
-        owner (reify
+        owner (specify! (clj->js om/pure-methods)
                 om/IGetState
                 (-get-state [this]
                   @mem)
