@@ -2,13 +2,13 @@
   (:require-macros
    [om-tools.test-utils :refer [with-element]])
   (:require
+   [cemerick.cljs.test :as t :include-macros true :refer-macros [deftest is use-fixtures]]
    [om-tools.schema :as schema]
-   [om-tools.core :as ot :include-macros true :refer [defcomponentk]]
+   [om-tools.core :as ot :include-macros true :refer-macros [defcomponentk]]
    [om-tools.dom :as dom :include-macros true]
    [schema.core :as s :include-macros true]
    [schema.test :as schema-test]
-   [om.core :as om]
-   [cemerick.cljs.test :as t :include-macros true :refer [deftest is use-fixtures]]))
+   [om.core :as om]))
 
 (s/defschema Item
   {:id s/Int :name s/Str})

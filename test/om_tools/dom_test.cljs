@@ -1,8 +1,6 @@
 (ns om-tools.dom-test
-  (:require-macros
-   [cemerick.cljs.test :refer [is deftest testing are]])
   (:require
-   cemerick.cljs.test
+   [cemerick.cljs.test :refer-macros [is deftest testing are]]
    [om.dom :as om-dom :include-macros true]
    [om-tools.dom :as dom :include-macros true]))
 
