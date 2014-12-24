@@ -1,0 +1,3 @@
+language: clojure
+script: ./script/test
+sudo: false

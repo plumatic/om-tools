@@ -3,8 +3,7 @@
    [om.core :as om]
    [om-tools.core :refer-macros [defcomponentk]]
    [om-tools.dom :as dom :include-macros true]
-   [plumbing.core :as p :include-macros true]
-   [dommy.core :as dommy]))
+   [plumbing.core :as p :include-macros true]))
 
 (defcomponentk slider [[:data value {min 0} {max 100} :as cursor] state]
   (did-mount [_]
