@@ -1,3 +1,7 @@
+## 0.3.7
+
+*   Added forward compatibility with Om 0.8.0-alpha5 (React 0.12.2)
+
 ## 0.3.6
 
 *   Upgrade dependency: schema 0.3.1

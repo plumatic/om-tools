@@ -10,6 +10,8 @@ Leiningen dependency (Clojars):
 [prismatic/om-tools "0.3.6"]
 ```
 
+[![Build Status](https://travis-ci.org/Prismatic/om-tools.svg?branch=fix-react-0-12-dom)](https://travis-ci.org/Prismatic/om-tools)
+
 **This is an alpha release. The API and organizational structure are
   subject to change. Comments and contributions are much appreciated.**
 

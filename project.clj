@@ -6,16 +6,15 @@
             :distribution :repo}
 
   :dependencies [[prismatic/plumbing "0.3.5"]
-                 [prismatic/schema "0.3.1"]]
+                 [prismatic/schema "0.3.1"]
+                 [org.clojure/clojurescript "0.0-2202" :scope "provided"]
+                 [om "0.7.3" :scope "provided"]]
 
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.6.0"]
-                                  [org.clojure/clojurescript "0.0-2202"]
-                                  [om "0.7.1"]
-                                  [com.keminglabs/cljx "0.3.1"]
-                                  [prismatic/dommy "0.1.2"]]
+                                  [com.keminglabs/cljx "0.3.1" :exclusions [org.clojure/clojure]]]
                    :plugins [[com.keminglabs/cljx "0.3.1"]
                              [lein-cljsbuild "1.0.3"]
-                             [com.cemerick/clojurescript.test "0.3.0"]]
+                             [com.cemerick/clojurescript.test "0.3.3"]]
                    :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl
                                                      cljx.repl-middleware/wrap-cljx]}
                    :cljx
@@ -25,10 +24,12 @@
                              {:source-paths ["src"]
                               :output-path "target/generated/src"
                               :rules :cljs}]}}
-             :1.5 {:dependencies [[org.clojure/clojure "1.5.1"]]}
-             :1.7 {:dependencies [[org.clojure/clojure "1.7.0-alpha2"]]}}
+             :om-0.7 {:dependencies [[org.clojure/clojurescript "0.0-2322"]
+                                     [om "0.7.3"]]}
+             :om-0.8 {:dependencies [[org.clojure/clojurescript "0.0-2505"]
+                                     [om "0.8.0-beta5"]]}}
 
-  :aliases {"all" ["with-profile" "dev:dev,1.5:dev,1.7"]
+  :aliases {"all" ["with-profile" "+om-0.7:+om-0.8"]
             "deploy" ["do" "clean," "cljx" "once," "deploy" "clojars"]
             "test" ["do" "clean," "cljx" "once," "test," "with-profile" "+dev" "cljsbuild" "test"]}
 
@@ -39,19 +40,20 @@
 
   :source-paths ["target/generated/src" "src"]
 
+  :prep-tasks [["cljx" "once"]]
+
   :cljsbuild
   {:test-commands {"unit" ["phantomjs" :runner
                            "test/vendor/es5-shim.js"
                            "test/vendor/es5-sham.js"
                            "test/vendor/console-polyfill.js"
-                           "target/om_tools.js"]}
+                           "target/test.js"]}
    :builds [{:id "test"
              :source-paths ["src" "test" "target/generated/src"]
-             :compiler {:output-to "target/om_tools.js"
+             :compiler {:output-to "target/test.js"
                         :optimizations :whitespace
                         :pretty-print true
-                        :preamble ["react/react_with_addons.js"]
-                        :externs ["react/externs/react.js"]}}
+                        :preamble ["react/react_with_addons.js"]}}
             {:id "example/sliders"
              :source-paths ["src" "target/generated/src" "examples/sliders/src"]
              :compiler {:output-to "examples/sliders/main.js"
