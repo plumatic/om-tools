@@ -1,6 +1,10 @@
-## 0.3.7
+## 0.3.8
 
 *   Added forward compatibility with Om 0.8.0-alpha5 (React 0.12.2)
+
+## 0.3.7
+
+Botched release. Same as 0.3.6.
 
 ## 0.3.6
 
