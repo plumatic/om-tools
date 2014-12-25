@@ -10,20 +10,11 @@
                  [org.clojure/clojurescript "0.0-2202" :scope "provided"]
                  [om "0.7.3" :scope "provided"]]
 
-  :profiles {:dev {:dependencies [[org.clojure/clojure "1.6.0"]
-                                  [com.keminglabs/cljx "0.3.1" :exclusions [org.clojure/clojure]]]
-                   :plugins [[com.keminglabs/cljx "0.3.1"]
+  :profiles {:dev {:dependencies [[org.clojure/clojure "1.6.0"]]
+                   :plugins [[com.keminglabs/cljx "0.5.0"]
                              [lein-cljsbuild "1.0.3"]
                              [com.cemerick/clojurescript.test "0.3.3"]]
-                   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl
-                                                     cljx.repl-middleware/wrap-cljx]}
-                   :cljx
-                   {:builds [{:source-paths ["src"]
-                              :output-path "target/generated/src"
-                              :rules :clj}
-                             {:source-paths ["src"]
-                              :output-path "target/generated/src"
-                              :rules :cljs}]}}
+                   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}
              :om-0.7 {:dependencies [[org.clojure/clojurescript "0.0-2322"]
                                      [om "0.7.3"]]}
              :om-0.8 {:dependencies [[org.clojure/clojurescript "0.0-2505"]
@@ -41,6 +32,14 @@
   :source-paths ["target/generated/src" "src"]
 
   :prep-tasks [["cljx" "once"]]
+
+  :cljx
+  {:builds [{:source-paths ["src"]
+             :output-path "target/generated/src"
+             :rules :clj}
+            {:source-paths ["src"]
+             :output-path "target/generated/src"
+             :rules :cljs}]}
 
   :cljsbuild
   {:test-commands {"unit" ["phantomjs" :runner
