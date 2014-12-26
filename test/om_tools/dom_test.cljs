@@ -178,6 +178,16 @@
     (is=el (om-dom/div #js {:style #js {:backgroundColor "red"}})
            (dom/div {:style (when true {:background-color "red"})})))
 
+  (testing "taking refernce of dom fns at runtime"
+    (let [h1 dom/h1
+          om-h1 om-dom/h1]
+      (is=el (h1 {} "Heading")
+             (om-h1 #js {} "Heading")))
+    (let [input dom/input
+          om-input om-dom/input]
+      (is=el (input {:type "text"})
+             (om-input #js {:type "text"}))))
+
   (testing "js values still work"
     (is=el (dom/div #js {} (dom/span #js {}))
            (om-dom/div #js {} (om-dom/span #js {})))
