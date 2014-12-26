@@ -26,15 +26,15 @@
   [s]
   (str/replace s #"-(\w)" (comp str/upper-case second)))
 
-(defn opt-key-case
+(defn- opt-key-case
   "Converts attributes that are kebab-case and should be camelCase"
   [attr]
   (if (or (< (count attr) 5)
-          (#{"data-" "aria-"} (subs attr 0 5)))
+          (case (subs attr 0 5) ("data-" "aria-") true false))
     attr
     (camel-case attr)))
 
-(defn opt-key-alias
+(defn- opt-key-alias
   "Converts aliased attributes"
   [opt]
   (case opt
