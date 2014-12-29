@@ -1,6 +1,8 @@
 (ns om-tools.dom
   "DOM element constructors for React. Mirrors om.dom namespace"
   (:refer-clojure :exclude [map meta time])
+  #+cljs
+  (:require-macros [om-tools.dom :as dom])
   (:require
    [clojure.string :as str]
    om.dom
@@ -8,6 +10,9 @@
   #+clj
   (:import
    [cljs.tagged_literals JSValue]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Private
 
 #+clj
 (defn clj->js [v]
@@ -86,9 +91,13 @@
       (symbol? form)
       (list? form)))
 
-(def form-tags
-  '[input textarea option])
+#+clj
+(def form-tags '[input textarea option])
 
+#+clj
+(def all-tags (concat om.dom/tags form-tags))
+
+#+clj
 (defn el-ctor [tag]
   (if (some (partial = tag) form-tags)
     (symbol "om.dom" (name tag))
@@ -141,10 +150,33 @@
 
 (defmacro ^:private gen-om-dom-inline-fns []
   `(do
-     ~@(clojure.core/map gen-om-dom-inline-fn (concat om.dom/tags form-tags))))
+     ~@(clojure.core/map gen-om-dom-inline-fn all-tags)))
 
 #+clj
 (gen-om-dom-inline-fns)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Private: Element Functions (runtime)
+
+#+clj
+(defn ^:private gen-om-dom-fn [tag]
+  (let [ctor (el-ctor tag)]
+    `(defn ~tag
+       ([]
+          (om-tools.dom/element ~ctor nil nil))
+       ([opts# & children#]
+          (om-tools.dom/element ~ctor opts# children#)))))
+
+#+clj
+(defmacro ^:private gen-om-dom-fns []
+  `(do
+     ~@(clojure.core/map gen-om-dom-fn all-tags)))
+
+#+cljs
+(dom/gen-om-dom-fns)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Public
 
 #+cljs
 (defn class-set [m]

@@ -1,3 +1,7 @@
+## 0.3.10
+
+*   Generate functions that mirror DOM element macros
+
 ## 0.3.9
 
 *   Added forward compatibility with Om 0.8.0-alpha5 (React 0.12.2)
