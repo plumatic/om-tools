@@ -1,3 +1,8 @@
+## 0.3.11
+
+*   Upgrade dependency: schema 0.4.0
+*   Upgrade dependency: plumbing 0.4.0
+
 ## 0.3.10
 
 *   Generate functions that mirror DOM element macros
