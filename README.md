@@ -223,7 +223,7 @@ keys:
 
 #### State Proxy (experimental)
 
-A component using `defcomponntk` can use the key, `:state`, to access
+A component using `defcomponentk` can use the key, `:state`, to access
 an atom-like object that conveniently wraps `om.core/get-state` and
 `om.core/set-state!` so that we can read and write state idiomatically
 with `deref`, `reset!` and `swap!`.
