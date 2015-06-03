@@ -1,7 +1,7 @@
 # om-tools
 
 A ClojureScript library of general-purpose tools for building applications with
-[Om](https://github.com/swannodette/om) and
+[Om](https://github.com/omcljs/om) and
 [Facebook's React](http://facebook.github.io/react/).
 
 Leiningen dependency (Clojars):
