@@ -6,7 +6,7 @@
    [plumbing.core :as p #+cljs :include-macros #+cljs true]
    [schema.core :as s #+cljs :include-macros #+cljs true]
    #+clj [om-tools.util :as util]
-   #+clj cljs.core)
+   #+clj [cljs.core])
   #+clj
   (:import
    [cljs.tagged_literals JSValue]))

@@ -5,8 +5,8 @@
   (:require-macros [om-tools.dom :as dom])
   (:require
    [clojure.string :as str]
-   om.dom
-   #+clj cljs.core)
+   [om.dom]
+   #+clj [cljs.core])
   #+clj
   (:import
    [cljs.tagged_literals JSValue]))
