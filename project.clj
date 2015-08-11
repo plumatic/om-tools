@@ -5,8 +5,8 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"
             :distribution :repo}
 
-  :dependencies [[prismatic/plumbing "0.4.0"]
-                 [prismatic/schema "0.4.0"]
+  :dependencies [[prismatic/plumbing "0.4.4"]
+                 [prismatic/schema "0.4.3"]
                  [org.clojure/clojurescript "0.0-2665" :scope "provided"]
                  [om "0.7.3" :scope "provided"]]
 
