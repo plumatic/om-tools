@@ -1,3 +1,8 @@
+## 0.3.12
+
+*   Upgrade dependency: schema 0.4.3
+*   Upgrade dependency: plumbing 0.4.4
+
 ## 0.3.11
 
 *   Upgrade dependency: schema 0.4.0
