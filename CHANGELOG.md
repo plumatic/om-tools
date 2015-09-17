@@ -1,3 +1,8 @@
+## 0.4.0
+
+*   BREAKING: Upgrade dependency: schema 1.0.1, breaking compatibility with pre-1.0.0 schema
+*   Upgrade dependency: plumbing 0.5.0
+
 ## 0.3.12
 
 *   Upgrade dependency: schema 0.4.3

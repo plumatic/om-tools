@@ -1,12 +1,12 @@
-(defproject prismatic/om-tools "0.3.13-SNAPSHOT"
+(defproject prismatic/om-tools "0.4.0-SNAPSHOT"
   :description "Tools for building Om applications"
   :url "http://github.com/prismatic/om-tools"
   :license {:name "Eclipse Public License - v 1.0"
             :url "http://www.eclipse.org/legal/epl-v10.html"
             :distribution :repo}
 
-  :dependencies [[prismatic/plumbing "0.4.4"]
-                 [prismatic/schema "0.4.3"]
+  :dependencies [[prismatic/plumbing "0.5.0"]
+                 [prismatic/schema "1.0.1"]
                  [org.clojure/clojurescript "0.0-2665" :scope "provided"]
                  [om "0.7.3" :scope "provided"]]
 
