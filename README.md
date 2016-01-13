@@ -142,10 +142,10 @@ It also provides additional useful utilities mentioned in
 #### Fnk-style Arguments
 
 The args vector of `defcomponentk` uses
-[Fnk syntax](https://github.com/Prismatic/plumbing/tree/master/src/plumbing/fnk#fnk-syntax)
+[Fnk syntax](https://github.com/plumatic/plumbing/tree/master/src/plumbing/fnk#fnk-syntax)
 that's optimized for destructuring (nested) maps with keyword keys.
 It is the similar pattern used in our
-[Fnhouse](https://github.com/Prismatic/fnhouse) library to
+[Fnhouse](https://github.com/plumatic/fnhouse) library to
 expressively declare HTTP handlers.
 
 If you are unfamiliar with this syntax, here are some quick comparisons
@@ -341,7 +341,7 @@ See [example](examples/mixin) for full version.
 ## Community
 
 Please feel free to open an
-[issue on GitHub](https://github.com/Prismatic/om-tools/issues/new)
+[issue on GitHub](https://github.com/plumatic/om-tools/issues/new)
 
 For announcements of new releases, you can also follow on
 [@PrismaticEng](http://twitter.com/prismaticeng) on Twitter.
@@ -354,8 +354,8 @@ please see CONTRIBUTING.md in the repo root for guidelines.
 Copyright (C) 2014 Prismatic and Contributors. Distributed under the Eclipse
 Public License, the same as Clojure.
 
-[schema]: https://github.com/Prismatic/schema
-[plumbing]: https://github.com/Prismatic/plumbing
+[schema]: https://github.com/plumatic/schema
+[plumbing]: https://github.com/plumatic/plumbing
 [om]: https://github.com/swannodette/om
 [react-mixin]: http://facebook.github.io/react/docs/reusable-components.html#mixins
 [om-mixin]: https://github.com/swannodette/om/blob/master/examples/mixins/src/core.cljs

@@ -3,7 +3,7 @@
 Contributions to om-tools are very welcome.
 
 Please file bug reports on
-[GitHub](https://github.com/prismatic/om-tools/issues).
+[GitHub](https://github.com/plumatic/om-tools/issues).
 
 Contributions are preferred as GitHub pull requests on topic branches.  If you
 want to discuss a potential change before coding it up, please open an issue.
