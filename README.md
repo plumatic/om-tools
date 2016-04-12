@@ -292,7 +292,7 @@ React provides [mixin functionality][react-mixin] to handle
 cross-cutting concerns and allow highly reusable component behaviors.
 While [mixins are possible with Om][om-mixin], it does not provide
 much functionality to support this React feature.
-One issue is that you must create a React constuctor and specify it
+One issue is that you must create a React constructor and specify it
 each time the component is built.
 This puts the responsibility of using mixins on both the component
 (create a constructor) and its parent (specify the constructor).
