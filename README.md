@@ -10,8 +10,7 @@ Leiningen dependency (Clojars):
 
 [![Build Status](https://travis-ci.org/plumatic/om-tools.svg?branch=fix-react-0-12-dom)](https://travis-ci.org/plumatic/om-tools)
 
-**This is an alpha release. The API and organizational structure are
-  subject to change. Comments and contributions are much appreciated.**
+** This library does not currently have an active maintainer.  If you are interested in becoming one, please post an issue.**
 
 ## Introduction
 
