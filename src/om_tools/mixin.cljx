@@ -3,7 +3,7 @@
   (:require
    [om.core :as om]
    #+clj [om-tools.util :as util]
-   #+clj cljs.core)
+   #+clj [cljs.core])
   #+clj
   (:import
    [cljs.tagged_literals JSValue]))
