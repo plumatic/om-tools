@@ -3,4 +3,4 @@ set -ev
 
 cd "$(dirname ${0})/.."
 
-lein all do clean, test, cljsbuild test
+lein do clean, test, cljsbuild test
