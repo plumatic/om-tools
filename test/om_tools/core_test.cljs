@@ -2,7 +2,7 @@
   (:require-macros
    [om-tools.test-utils :refer [with-element]])
   (:require
-   [cemerick.cljs.test :refer-macros [is are deftest testing use-fixtures done]]
+   [cemerick.cljs.test :refer-macros [is are deftest testing done use-fixtures]]
    [clojure.set :as set]
    [om-tools.core :as om-tools :refer-macros [defcomponent defcomponentk defcomponentmethod]]
    [om-tools.dom :as dom :include-macros true]
@@ -10,9 +10,7 @@
    [schema.core :as s :include-macros true]
    [schema.test :as schema-test]))
 
-(enable-console-print!)
-
-(def ReactTestUtils (.. js/React -addons -TestUtils))
+#_(def ReactTestUtils (.. js/React -addons -TestUtils))
 
 (s/defschema TestComponent
   {:foo s/Str :bar s/Str})
@@ -63,8 +61,8 @@
   (testing "schema error"
     (is (thrown? js/Error (test-component {:foo :bar :bar "bar"} nil)))
     (is (thrown? js/Error (test-component {:foo {} :bar "bar"} nil))))
-  (testing "build constructor"
-    (is (. js/React (isValidComponent (->test-component {:foo "foo" :bar "bar"})))))
+  #_(testing "build constructor"
+      (is (. js/React (isValidComponent (->test-component {:foo "foo" :bar "bar"})))))
   (testing "default display-name"
     (let [c (test-default-display-name-component {} nil)]
       (is (satisfies? om/IDisplayName c))
@@ -126,8 +124,8 @@
     (s/with-fn-validation
       (is (thrown? js/Error (test-componentk {:foo :bar :bar "bar"} nil)))
       (is (thrown? js/Error (test-componentk {:foo {} :bar "bar"} nil)))))
-  (testing "build constructor"
-    (is (. js/React (isValidComponent (->test-componentk {:foo "foo" :bar "bar"})))))
+  #_(testing "build constructor"
+      (is (. js/React (isValidComponent (->test-componentk {:foo "foo" :bar "bar"})))))
   (testing "default display-name"
     (let [c (test-default-display-name-componentk {} nil)]
       (is (satisfies? om/IDisplayName c))
@@ -145,7 +143,7 @@
 (defcomponentk shared-data-component
   [[:shared api-host api-version]]
   (render [_]
-    (dom/div (str api-host "/" api-version))))
+          (dom/div (str api-host "/" api-version))))
 
 (deftest defcomponentk-shared-test
   (with-element [e "div"]
@@ -159,11 +157,11 @@
 
 (defcomponentk stateful-component [data state]
   (did-mount [_]
-    (js/setTimeout #(swap! state assoc :y 2) 20))
+             (js/setTimeout #(swap! state assoc :y 2) 20))
   (render [_]
-    (dom/div
-     (let [{:keys [x y]} @state]
-       (str "x=" x ",y=" (or y "nil"))))))
+          (dom/div
+           (let [{:keys [x y]} @state]
+             (str "x=" x ",y=" (or y "nil"))))))
 
 (deftest ^:async state-proxy-test
   (let [e (.createElement js/document "div")]
@@ -226,14 +224,14 @@
 
 (deftest defcomponent-args-test
   (are [component] (fn? component)
-       component-with-docstring
-       component-with-attr-map
-       component-with-docstring-and-attr-map
-       component-with-prepost-map
-       componentk-with-docstring
-       componentk-with-attr-map
-       componentk-with-docstring-and-attr-map
-       componentk-with-prepost-map))
+    component-with-docstring
+    component-with-attr-map
+    component-with-docstring-and-attr-map
+    component-with-prepost-map
+    componentk-with-docstring
+    componentk-with-attr-map
+    componentk-with-docstring-and-attr-map
+    componentk-with-prepost-map))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -243,48 +241,48 @@
 (defcomponentmethod fruit-basket-item :default
   [fruit owner]
   (render [_]
-    (dom/label (str "Unknown fruit: " (name (:type fruit))))))
+          (dom/label (str "Unknown fruit: " (name (:type fruit))))))
 
 (defcomponentmethod fruit-basket-item :orange
   [orange _]
   (render [_]
-    (dom/label "Orange")))
+          (dom/label "Orange")))
 
 (defcomponentmethod fruit-basket-item :banana
   [banana :- {:peeled? s/Bool, s/Any s/Any} _]
   (render [_]
-    (dom/label (str "Banana" (when (:peeled? banana) " (peeled)")))))
+          (dom/label (str "Banana" (when (:peeled? banana) " (peeled)")))))
 
 (defcomponentmethod fruit-basket-item :apple
   [apple :- {:variety s/Keyword, s/Any s/Any} _]
   (render [_]
-    (dom/label
-     (if (= (:variety apple) :red-delicious)
-       "Apple (gross)"
-       "Apple"))))
+          (dom/label
+           (if (= (:variety apple) :red-delicious)
+             "Apple (gross)"
+             "Apple"))))
 
 (defcomponentk fruit-basket
   [[:data fruits :- [{:type s/Keyword, s/Any s/Any}]]]
   (render [_]
-    (dom/div
-     (om/build-all fruit-basket-item fruits))))
+          (dom/div
+           (om/build-all fruit-basket-item fruits))))
 
-(deftest multicomponent-test
-  (let [fruits [{:type :apple :variety :granny-smith}
-                {:type :banana :peeled? true}
-                {:type :apple :variety :red-delicious}
-                {:type :pineapple}
-                {:type :orange}]
-        c (om/build fruit-basket {:fruits fruits})
-        div (.createElement js/document "div")
-        d (.renderComponent js/React c div)]
-    (is (= ["Apple"
-            "Banana (peeled)"
-            "Apple (gross)"
-            "Unknown fruit: pineapple"
-            "Orange"]
-           (for [label (.scryRenderedDOMComponentsWithTag ReactTestUtils d "label")]
-             (.. label -props -children))))))
+#_(deftest multicomponent-test
+    (let [fruits [{:type :apple :variety :granny-smith}
+                  {:type :banana :peeled? true}
+                  {:type :apple :variety :red-delicious}
+                  {:type :pineapple}
+                  {:type :orange}]
+          c (om/build fruit-basket {:fruits fruits})
+          div (.createElement js/document "div")
+          d (.renderComponent js/React c div)]
+      (is (= ["Apple"
+              "Banana (peeled)"
+              "Apple (gross)"
+              "Unknown fruit: pineapple"
+              "Orange"]
+             (for [label (.scryRenderedDOMComponentsWithTag ReactTestUtils d "label")]
+               (.. label -props -children))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -293,17 +291,19 @@
         calls (atom {})
         owner (specify! (clj->js om/pure-methods)
                 om/IGetState
-                (-get-state [this]
-                  @mem)
-                (-get-state [this ks]
-                  (get-in @mem ks))
+                (-get-state
+                  ([this]
+                   @mem)
+                  ([this ks]
+                   (get-in @mem ks)))
                 om/ISetState
-                (-set-state! [this val render]
-                  (swap! calls update-in [::root] (fnil inc 0))
-                  (reset! mem val))
-                (-set-state! [this ks val render]
-                  (swap! calls update-in ks (fnil inc 0))
-                  (swap! mem assoc-in ks val)))]
+                (-set-state!
+                  ([this val render]
+                   (swap! calls update-in [::root] (fnil inc 0))
+                   (reset! mem val))
+                  ([this ks val render]
+                   (swap! calls update-in ks (fnil inc 0))
+                   (swap! mem assoc-in ks val))))]
     (is (not (nil? (om-tools/set-state?! owner {:bar "bar"}))))
     (is (= 1 (::root @calls)))
     (is (nil? (om-tools/set-state?! owner {:bar "bar"})))
