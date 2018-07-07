@@ -4,3 +4,6 @@ set -ev
 cd "$(dirname ${0})/.."
 
 lein do clean, test, cljsbuild test
+npm install -i puppeteer
+npm install -i lumo-cljs
+./node_modules/lumo-cljs/bin/lumo -i script/headless_test.cljs

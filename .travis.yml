@@ -1,6 +1,12 @@
 language: clojure
 script: ./script/test
 sudo: false
+# Required to run lumo for headless testing
+addons:
+  apt:
+    sources: [ 'ubuntu-toolchain-r-test']
+    packages: ['libstdc++6']
 cache:
   directories:
   - $HOME/.m2
+  - node_modules

@@ -13,3 +13,4 @@ pom.xml
 /examples/*/main.js
 *~
 *.asc
+node_modules/
