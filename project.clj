@@ -24,13 +24,7 @@
 
   :source-paths ["src"]
   :cljsbuild
-  {;;:test-commands
-   #_{"unit" ["phantomjs"
-              "test/vendor/es5-shim.js"
-              "test/vendor/es5-sham.js"
-              "test/vendor/console-polyfill.js"
-              "target/test.js"]}
-   :builds [{:id "test"
+  {:builds [{:id "test"
              :source-paths ["src" "test"]
              :compiler {:output-to "target/test.js"
                         :optimizations :advanced
